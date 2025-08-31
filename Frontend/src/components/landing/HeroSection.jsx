@@ -39,7 +39,7 @@ const HeroSection = ({ openSignIn, openSignUp }) => {
                 </div>
                 <div className="relative">
                     <div className="aspect-w-60 rounded-lg shadow-xl overflow-hidden">
-                        <img src="src/assets/Dashboard.jpeg" alt="Dashboard" className="object-cover w-full h-full"/>
+                        <img src="/Dashboard.jpeg" alt="Dashboard" className="object-cover w-full h-full"/>
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-black opacity-10 rounded-lg"></div>
                 </div>
