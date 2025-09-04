@@ -1,3 +1,4 @@
+import { LayoutDashboard,UploadIcon,Files,Receipt,CreditCard} from "lucide-react";
 
 
 export const features =[
@@ -93,5 +94,38 @@ export const testimonials = [
         feedback: "I can't imagine going back to the old way of doing things.",
         designation: "Product Manager, Tech Co",
         rating: 5
+    }
+];
+
+export const SIDE_MENU_DATA=[
+    { 
+        id: "01",
+        label:"Dashboard",
+        icon: LayoutDashboard,
+        path:"/dashboard",
+    },
+    {
+        id: "02",
+        label:"Upload",
+        icon: UploadIcon,
+        path:"/upload",
+    },
+    {
+        id: "03",
+        label:"My Files",
+        icon:Files,
+        path:"/my-files",
+    },
+    {
+        id: "04",
+        label:"Subscription",
+        icon: CreditCard,
+        path:"/subscription",
+    },
+    { 
+        id: "05",
+        label:"Transactions",
+        icon: Receipt,
+        path:"/transactions"
     }
 ];
