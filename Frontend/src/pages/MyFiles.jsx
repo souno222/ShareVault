@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DashboardLayout from "../layout/DashboardLayout";
 import { ListIcon } from "lucide-react";
 import { GridIcon } from "lucide-react";
-import { useAuth } from "../../node_modules/@clerk/clerk-react/dist/index";
+import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
+import toast from "react-hot-toast";
 const MyFiles = () => {
     const [files,setFiles]= useState([]);
     const [viewMode,setViewMode]= useState("list");
@@ -11,11 +12,20 @@ const MyFiles = () => {
     const fetchFiles = async () => {
         try {
             const token = await getToken();
-            axios.get('http://localhost:8080/api/v1.0/files/my',{)
+            const response = await axios.get('http://localhost:8080/api/v1.0/files/my',{headers: {Authorization: `Bearer ${token}`}});
+            if(response.status === 200){
+                setFiles(response.data);
+            }
         }catch (error) {
+            console.log('Error fetching the files from server:',error);
+            toast.error('Error fetching files from server',error.message);
+
         }
     }
 
+    useEffect(() => {
+        fetchFiles();
+    },[getToken]);
     return(
         <DashboardLayout activeMenu="My Files">
             <div className="p-6">
