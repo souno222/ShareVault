@@ -16,7 +16,7 @@ const HeroSection = ({ openSignIn, openSignUp }) => {
                                   cursorCharacter=""
                             />
                            {/*<span className="block">Share Files Securely with</span>*/}
-                            <span className="block text-purple-500"> ShareVault</span>
+                            <span className="block text-purple-500"> CloudShare</span>
                         </h1>
                         <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
                             Upload,manage,and share your files with ease and security. Experience seamless file sharing with CloudShare.
