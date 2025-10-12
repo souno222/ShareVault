@@ -7,13 +7,26 @@ import { useNavigate,Link } from "react-router-dom";
 import { ListIcon,GridIcon,GlobeIcon, LockIcon ,CopyIcon,DownloadIcon, TrashIcon,Eye,Image,Video,Music,FileText,FileIcon} from "lucide-react";
 import FileCard from "../components/FileCard";
 import { apiEndpoints } from "../util/apiendpoints";
+import ConfirmationDialog from "../components/ConfirmationDialog";
+import LinkShareModal from "../components/LinkShareModal";
 
-//fetch files from backend and display them in grid or list view for a logged in user
 const MyFiles = () => {
     const [files,setFiles]= useState([]);
     const [viewMode,setViewMode]= useState("list");
     const {getToken} = useAuth();
     const navigate = useNavigate();
+    const [deleteConfirmation, setDeleteConfirmation] = useState({ 
+        isOpen: false,
+        fileId: null 
+    });
+    const [shareModal,setShareModal] = useState({
+        isOpen: false,
+        fileId: null,
+        link:""
+    });
+
+
+//fetch files from backend and display them in grid or list view for a logged in user
 
     const fetchFiles = async () => {
         try {
@@ -69,7 +82,64 @@ const MyFiles = () => {
             }
         }
     }
+    //Close delete confirmation dialog
+    const closeDeleteConfirmation = () => {
+        setDeleteConfirmation({
+             isOpen: false, 
+             fileId: null 
+        });
+    }
+    //Open delete confirmation dialog
+    const openDeleteConfirmation = (fileId) => {
+        setDeleteConfirmation({ 
+            isOpen: true, 
+            fileId 
+        });
+    }
 
+    //Handle file deletion
+    const handleDelete = async () => {
+        const fileId = deleteConfirmation.fileId;
+        if(!fileId) return;
+        try{
+            const token = await getToken();
+            const response = await axios.delete(apiEndpoints.DELETE_FILE(fileId),{headers: {Authorization: `Bearer ${token}`}});
+            if(response.status === 204){
+                setFiles(files.filter((file) => file.id !== fileId));
+                closeDeleteConfirmation();
+                toast.success('File deleted successfully');
+
+            }
+            else{
+                toast.error('Error deleting file');
+            }
+        }catch(error){
+            console.error('Error deleting file:',error);
+            toast.error('Error deleting file',error.message);
+        }
+    }
+
+    //opens share modal
+
+    const openShareModal = (fileId) => {
+        const link = `${window.location.origin}/file/${fileId}`;
+        setShareModal({
+            isOpen: true,
+            fileId,
+            link
+        });
+    }
+
+
+    //Close share modal
+
+    const closeShareModal = () => {
+        setShareModal({
+            isOpen: false,
+            fileId: null,
+            link:""
+        });
+    }
     useEffect(() => {
         fetchFiles();
     },[getToken]);
@@ -130,7 +200,12 @@ const MyFiles = () => {
                         {files.map((file) => (
                             <FileCard 
                                 key={file.id} 
-                                file={file} />
+                                file={file}
+                                onDelete={openDeleteConfirmation}
+                                onTogglePublic={togglePublic}
+                                onDownload={handleDownload}
+                                onShareLink={openShareModal}
+                            />
                         ))}
                     </div>
                 ):(
@@ -151,7 +226,9 @@ const MyFiles = () => {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
                                             <div className="flex items-center gap-2">
                                                 {getFileIcon(file)}
-                                                {file.name}
+                                                <a href={`/file/${file.id}`} title="View File" target="_blank" rel="noreferrer" className=" hover:text-blue-600">
+                                                    {file.name}
+                                                </a>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
@@ -183,6 +260,7 @@ const MyFiles = () => {
                                                 </button>
                                                 {file.public && (
                                                     <button 
+                                                        onClick={() => openShareModal(file.id)}
                                                         className="flex items-center gap-2 cursor-pointer text-blue-600 group">
                                                         <CopyIcon size={16} />
                                                         <span className="group-hover:underline">
@@ -205,6 +283,7 @@ const MyFiles = () => {
                                             
                                             <div className="flex justify-center">   
                                                 <button 
+                                                    onClick={() => openDeleteConfirmation(file.id)}
                                                     title="Delete"
                                                     className="text-gray-500 hover:text-red-600 hover:bg-red-600 hover:text-white p-1 rounded-full transition-all duration-200">
                                                         <TrashIcon size={18} />
@@ -227,6 +306,25 @@ const MyFiles = () => {
                         </table>
                     </div>
                 )}
+                {/* Modal for file actions */}
+                <ConfirmationDialog 
+                    isOpen={deleteConfirmation.isOpen}
+                    onClose={closeDeleteConfirmation}
+                    title="Delete File"
+                    message="Are you sure you want to delete this file? This action cannot be undone."
+                    confirmText="Delete"
+                    cancelText="Cancel"
+                    onConfirm={handleDelete}
+                    confirmationButtonClass="bg-red-600 hover:bg-red-700"
+                />
+
+                {/* Share Modal */}
+                <LinkShareModal
+                    isOpen={shareModal.isOpen}
+                    onClose={closeShareModal}
+                    link={shareModal.link}
+                    title="Share File"
+                />
             </div>
         </DashboardLayout>
     )

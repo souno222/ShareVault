@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Image,Video ,Music,FileText,FileIcon,GlobeIcon,LockIcon,Copy,EyeIcon,DownloadIcon,TrashIcon,} from 'lucide-react';
 
-const FileCard = ({file}) => {
+const FileCard = ({file,onDelete,onTogglePublic,onDownload,onShareLink}) => {
     const [showActions,setShowActions]= useState(false);
+
     const getFileIcon = (file) => {
         const extension = file.name.split('.').pop().toLowerCase();
         if(['jpg','jpeg','png','gif','bmp','svg','webp'].includes(extension)){
@@ -69,6 +70,7 @@ const FileCard = ({file}) => {
                     <div className="flex gap-3 w-full justify-center">
                         {file.public && (
                             <button 
+                                onClick={() => onShareLink(file.id)}
                                 title="Share"    
                                 className="p-2 bg-white/90 rounded-full hover:bg-white cursor-pointer transition-colors text-purple-500 hover:text-purple-600">
                                 <Copy size={18} />
@@ -81,17 +83,20 @@ const FileCard = ({file}) => {
                         )}
 
                         <button 
+                            onClick={() => onDownload(file)}
                             title="Download"
                             className="p-2 bg-white/90 rounded-full hover:bg-white cursor-pointer transition-colors text-green-600 hover:text-green-700">
                             <DownloadIcon size={18} />
                         </button>
                         <button
+                            onClick={() => onTogglePublic(file)}
                             title={file.public ? "Make Private" : "Make Public"}
                             className="p-2 bg-white/90 rounded-full hover:bg-white cursor-pointer transition-colors text-amber-600 hover:text-amber-700"   
                         >
                             {file.public ? <LockIcon size={18} /> : <GlobeIcon size={18} />}
                         </button>
                         <button
+                            onClick={() => onDelete(file.id)}
                             title="Delete" 
                             className="p-2 bg-white/90 rounded-full hover:bg-white cursor-pointer transition-colors text-red-600 hover:text-red-700">
                             <TrashIcon size={18} />

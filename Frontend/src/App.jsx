@@ -8,51 +8,54 @@ import Transactions from "./pages/Transactions";
 import Upload from "./pages/Upload";
 import { SignedIn,SignedOut,RedirectToSignIn } from "@clerk/clerk-react";
 import { Toaster } from "react-hot-toast";
+import { UserCreditsProvider } from "./context/UserCreditsContext";
 
 const App =() => {
   return (
-    <BrowserRouter>
-      <Toaster />
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/dashboard" element={
-          <>
-          <SignedIn><Dashboard /></SignedIn>
-          <SignedOut><RedirectToSignIn /></SignedOut>
-          </>
-        } />
-        <Route path="/my-files" element={
-          <>
-          <SignedIn><MyFiles /></SignedIn>
-          <SignedOut><RedirectToSignIn /></SignedOut>
-          </>
-        } />
-        <Route path="/public-file-view" element={
-          <>
-          <SignedIn><PublicFileView /></SignedIn>
-          <SignedOut><RedirectToSignIn /></SignedOut>
-          </>
-        } />
-        <Route path="/subscription" element={
-          <>
-          <SignedIn><Subscription /></SignedIn>
-          <SignedOut><RedirectToSignIn /></SignedOut>
-          </>
-        } />
-        <Route path="/transactions" element={
-          <>
-          <SignedIn><Transactions /></SignedIn>
-          <SignedOut><RedirectToSignIn /></SignedOut>
-          </>
-        } />
-        <Route path="/upload" element={
-          <>
-          <SignedIn><Upload /></SignedIn>
-          <SignedOut><RedirectToSignIn /></SignedOut>
-          </>
-        } />
-      </Routes>
-    </BrowserRouter>
+    <UserCreditsProvider>
+      <BrowserRouter>
+        <Toaster />
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/dashboard" element={
+            <>
+            <SignedIn><Dashboard /></SignedIn>
+            <SignedOut><RedirectToSignIn /></SignedOut>
+            </>
+          } />
+          <Route path="/my-files" element={
+            <>
+            <SignedIn><MyFiles /></SignedIn>
+            <SignedOut><RedirectToSignIn /></SignedOut>
+            </>
+          } />
+          <Route path="/public-file-view" element={
+            <>
+            <SignedIn><PublicFileView /></SignedIn>
+            <SignedOut><RedirectToSignIn /></SignedOut>
+            </>
+          } />
+          <Route path="/subscription" element={
+            <>
+            <SignedIn><Subscription /></SignedIn>
+            <SignedOut><RedirectToSignIn /></SignedOut>
+            </>
+          } />
+          <Route path="/transactions" element={
+            <>
+            <SignedIn><Transactions /></SignedIn>
+            <SignedOut><RedirectToSignIn /></SignedOut>
+            </>
+          } />
+          <Route path="/upload" element={
+            <>
+            <SignedIn><Upload /></SignedIn>
+            <SignedOut><RedirectToSignIn /></SignedOut>
+            </>
+          } />
+        </Routes>
+      </BrowserRouter>
+    </UserCreditsProvider>
   );
 }
 export default App;
