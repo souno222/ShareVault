@@ -15,6 +15,25 @@ const MyFiles = () => {
     const {getToken} = useAuth();
     const navigate = useNavigate();
 
+    const getFileIcon = (file) => {
+        if (!file || !file.name) return <FileIcon size={20} className="text-gray-500" />;
+        
+        const extension = file.name.split('.').pop()?.toLowerCase() || '';
+        
+        if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'].includes(extension)) {
+            return <Image size={20} className="text-purple-500" />;
+        }
+        if (['mp4', 'mkv', 'webm', 'avi', 'mov'].includes(extension)) {
+            return <Video size={20} className="text-blue-500" />;
+        }
+        if (['mp3', 'wav', 'flac', 'aac'].includes(extension)) {
+            return <Music size={20} className="text-green-500" />;
+        }
+        if (['pdf', 'doc', 'docx', 'txt'].includes(extension)) {
+            return <FileText size={20} className="text-amber-500" />;
+        }
+        return <FileIcon size={20} className="text-gray-500" />;
+    };
     const fetchFiles = async () => {
         try {
             const token = await getToken();
