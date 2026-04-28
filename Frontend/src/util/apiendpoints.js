@@ -1,4 +1,4 @@
-const BASE_URL = "http://138.91.33.6/api/v1.5";
+const BASE_URL = "httpssharevault-api.southeastasia.cloudapp.azure.com/api/v1.5";
 
 export const apiEndpoints = {
     FETCH_FILES: `${BASE_URL}/files/my`,
