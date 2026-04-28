@@ -130,7 +130,7 @@ const PublicFileView = () => {
         const getFileAndDownload = async () => {
             try {
                 const token = await getToken();
-                
+                console.log("AXIOS TARGET URL:", apiEndpoints.PUBLIC_FILE_VIEW(fileId));
                 // Get file metadata
                 const fileResponse = await axios.get(apiEndpoints.PUBLIC_FILE_VIEW(fileId), {
                     headers: { Authorization: `Bearer ${token}` }
