@@ -312,7 +312,7 @@ const MyFiles = () => {
 
                 {/* ── Loading ── */}
                 {loading && viewMode === 'grid' && (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1px', backgroundColor: '#000000' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '24px' }}>
                         {[...Array(8)].map((_, i) => <SkeletonCard key={i} />)}
                     </div>
                 )}
@@ -356,8 +356,7 @@ const MyFiles = () => {
 
                 {/* ── Grid view ── */}
                 {!loading && files.length > 0 && viewMode === 'grid' && (
-                    /* Hairline 1px #000 gutters between cards */
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1px', backgroundColor: '#000000' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px' }}>
                         {files.map((file) => (
                             <FileCard
                                 key={file.id}

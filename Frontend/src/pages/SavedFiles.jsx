@@ -218,7 +218,7 @@ const SavedFiles = () => {
 
                 {/* ── Loading skeleton ── */}
                 {loading && viewMode === 'grid' && (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1px', backgroundColor: '#000000' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '24px' }}>
                         {[...Array(8)].map((_, i) => <SkeletonCard key={i} />)}
                     </div>
                 )}
@@ -260,14 +260,14 @@ const SavedFiles = () => {
 
                 {/* ── Grid view ── */}
                 {!loading && savedFiles.length > 0 && viewMode === 'grid' && (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1px', backgroundColor: '#000000' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '24px' }}>
                         {savedFiles.map((file) => (
                             /* DESIGN.md: no rounded corners, no shadow */
                             <div
                                 key={file._id}
                                 onMouseEnter={() => setHoverCard(file._id)}
                                 onMouseLeave={() => setHoverCard(null)}
-                                style={{ position: 'relative', backgroundColor: '#ffffff', overflow: 'hidden' }}
+                                style={{ position: 'relative', backgroundColor: '#ffffff', border: '1px solid #000000', overflow: 'hidden' }}
                             >
                                 {/* Preview */}
                                 <div style={{ height: '112px', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid #e2e8f0' }}>
