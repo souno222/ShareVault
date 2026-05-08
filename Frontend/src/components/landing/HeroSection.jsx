@@ -71,11 +71,15 @@ const HeroSection = ({ openSignIn, openSignUp, isSignedIn, navigate }) => {
                 <hr className="border-0 border-t border-ink m-0" />
 
                 {/* ── STATS ROW ── */}
-                <div className="grid grid-cols-3 border-b border-ink">
+                <div className="grid md:grid-cols-3 grid-cols-1 border-b border-ink">
                     {stats.map((stat, i) => (
                         <div
                             key={i}
-                            className={`py-8 ${i > 0 ? "pl-8" : "pl-0"} ${i < 2 ? "pr-8 border-r border-ink" : "pr-0"}`}
+                            className={`py-6 md:py-8 ${
+                                i !== 2 ? "border-b md:border-b-0 md:border-r border-ink" : ""
+                            } ${
+                                i === 0 ? "md:pr-8" : i === 2 ? "md:pl-8" : "md:px-8"
+                            }`}
                         >
                             <div className="font-display font-normal text-[2.5rem] leading-none tracking-hero text-page-ink mb-2">
                                 {stat.number}

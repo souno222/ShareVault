@@ -369,7 +369,7 @@ const SavedFiles = () => {
                         </div>
 
                         {/* Mobile stacked */}
-                        <div className="lg:hidden" style={{ display: 'flex', flexDirection: 'column', gap: '1px', backgroundColor: '#000000' }}>
+                        <div className="flex flex-col lg:hidden" style={{ gap: '1px', backgroundColor: '#000000' }}>
                             {savedFiles.map((file) => (
                                 <div key={file._id} style={{ backgroundColor: '#ffffff', padding: '16px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>

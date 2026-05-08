@@ -464,7 +464,7 @@ const MyFiles = () => {
                         </div>
 
                         {/* Mobile stacked rows */}
-                        <div className="lg:hidden" style={{ display: 'flex', flexDirection: 'column', gap: '1px', backgroundColor: '#000000' }}>
+                        <div className="flex flex-col lg:hidden" style={{ gap: '1px', backgroundColor: '#000000' }}>
                             {files.map((file) => {
                                 const vis = VISIBILITY[file.visibility] || VISIBILITY.private;
                                 return (
