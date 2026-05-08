@@ -1,10 +1,7 @@
 import { SignIn } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 
-/* ─────────────────────────────────────────────────────────────
-   Clerk appearance tokens — strip every rounded corner, shadow,
-   and color outside the WIRED grayscale + #057dbc palette.
-   ───────────────────────────────────────────────────────────── */
+
 const clerkAppearance = {
   variables: {
     colorPrimary: "#000000",
