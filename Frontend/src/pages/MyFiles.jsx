@@ -356,7 +356,7 @@ const MyFiles = () => {
 
                 {/* ── Grid view ── */}
                 {!loading && files.length > 0 && viewMode === 'grid' && (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '24px',backgroundColor:'#ffffff' }}>
                         {files.map((file) => (
                             <FileCard
                                 key={file.id}
