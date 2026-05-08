@@ -127,7 +127,7 @@ const Subscription = () => {
             try {
                 const token = await getToken();
                 const res = await axios.get(apiEndpoints.GET_CREDITS, { headers: { Authorization: `Bearer ${token}` } });
-                setCredits(res.data.credits);
+                setCredits(res.data.storage);
             } catch {
                 setMessage('Failed to load current storage. Please try again.');
                 setMessageType('error');
