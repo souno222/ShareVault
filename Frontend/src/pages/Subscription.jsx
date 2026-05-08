@@ -121,21 +121,7 @@ const Subscription = () => {
         };
     }, []);
 
-    /* ── Fetch credits ── */
-    useEffect(() => {
-        const fetchUserCredits = async () => {
-            try {
-                const token = await getToken();
-                const res = await axios.get(apiEndpoints.GET_CREDITS, { headers: { Authorization: `Bearer ${token}` } });
-                setCredits(res.data.storage);
-            } catch {
-                setMessage('Failed to load current storage. Please try again.');
-                setMessageType('error');
-            }
-        };
-        fetchUserCredits();
-    }, [getToken]);
-
+    
     /* ── Handle purchase ── */
     const handlePurchase = async (plan) => {
         if (!razorpayLoaded) {
