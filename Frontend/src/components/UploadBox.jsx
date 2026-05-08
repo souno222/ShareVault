@@ -132,7 +132,7 @@ const UploadBox = ({
                         lineHeight: 1.33,
                     }}
                 >
-                    {remainingCredits} credit{remainingCredits !== 1 ? 's' : ''} remaining · max 5 files
+                    max 5 files
                 </p>
             </div>
 
@@ -308,8 +308,8 @@ const UploadBox = ({
                             {remainingCredits <= 0
                                 ? 'No credits remaining — upgrade to continue'
                                 : files.length > remainingCredits
-                                ? `${files.length} files selected · only ${remainingCredits} credit${remainingCredits !== 1 ? 's' : ''} available`
-                                : 'Select files above to enable upload'}
+                                    ? `${files.length} files selected · only ${remainingCredits} credit${remainingCredits !== 1 ? 's' : ''} available`
+                                    : 'Select files above to enable upload'}
                         </p>
                     )}
                 </div>
