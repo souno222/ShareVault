@@ -1,110 +1,216 @@
 import { useState } from 'react';
-import { Image,Video ,Music,FileText,FileIcon,GlobeIcon,LockIcon,Copy,EyeIcon,DownloadIcon,TrashIcon,} from 'lucide-react';
+import { Image, Video, Music, FileText, FileIcon, GlobeIcon, LockIcon, Shield, Copy, EyeIcon, DownloadIcon, TrashIcon } from 'lucide-react';
 
-const FileCard = ({file,onDelete,onTogglePublic,onDownload,onShareLink}) => {
-    const [showActions,setShowActions]= useState(false);
+/**
+ * WIRED-system FileCard (grid view tile)
+ * - No rounded corners, no shadow, no gradient fills
+ * - File preview area = plain #f5f5f5 surface, no gradient
+ * - Visibility badge = mono ALL-CAPS kicker tag (text pill with border-radius 1920px per DESIGN.md)
+ * - Hover actions = inverted black overlay strip at bottom, not a gradient scrim
+ * - Action buttons = round icon buttons (the ONLY circular shape allowed)
+ */
+const FileCard = ({ file, onDelete, onManageVisibility, onDownload, onShareLink }) => {
+    const [showActions, setShowActions] = useState(false);
 
     const getFileIcon = (file) => {
-        const extension = file.name.split('.').pop().toLowerCase();
-        if(['jpg','jpeg','png','gif','bmp','svg','webp'].includes(extension)){
-            return <Image size={24} className="text-purple-500" />;
-        }
-        if(['mp4','mkv','webm','avi','mov'].includes(extension)){
-            return <Video size={24} className="text-blue-500" />;
-        }
-        if(['mp3','wav','flac','aac'].includes(extension)){
-            return <Music size={24} className="text-green-500" />;
-        }
-        if(['pdf','doc','docx','ppt','pptx','txt'].includes(extension)){
-            return <FileText size={24} className="text-amber-500" />;
-        }
-        return <FileIcon size={24} className="text-purple-500" />;
-
-    }
+        const ext = file.name.split('.').pop().toLowerCase();
+        // DESIGN.md: no color outside grayscale + #057dbc — icons use page-ink only
+        if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'].includes(ext))
+            return <Image size={28} strokeWidth={1.5} style={{ color: '#1a1a1a' }} />;
+        if (['mp4', 'mkv', 'webm', 'avi', 'mov'].includes(ext))
+            return <Video size={28} strokeWidth={1.5} style={{ color: '#1a1a1a' }} />;
+        if (['mp3', 'wav', 'flac', 'aac'].includes(ext))
+            return <Music size={28} strokeWidth={1.5} style={{ color: '#1a1a1a' }} />;
+        if (['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt'].includes(ext))
+            return <FileText size={28} strokeWidth={1.5} style={{ color: '#1a1a1a' }} />;
+        return <FileIcon size={28} strokeWidth={1.5} style={{ color: '#1a1a1a' }} />;
+    };
 
     const formatFileSize = (bytes) => {
-        if (bytes < 1024) return bytes + 'B';
-        else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + 'KB';
-        else return (bytes / 1048576).toFixed(1) + 'MB';
-    }
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / 1048576).toFixed(1) + ' MB';
+    };
 
-    const formatDate = (dateString) => {
-       const date = new Date(dateString);
-       return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-    }
+    const formatDate = (dateString) =>
+        new Date(dateString).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+
+    const getVisibilityLabel = (v) => {
+        if (v === 'public') return 'Public';
+        if (v === 'protected') return 'Protected';
+        return 'Private';
+    };
+
     return (
-        <div 
+        /* DESIGN.md: no rounded corners, no shadow, 1px black hairline border */
+        <div
             onMouseEnter={() => setShowActions(true)}
             onMouseLeave={() => setShowActions(false)}
-            className="relative group overflow-hidden rounded-xl bg-white shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 ">
-            {/* file preview area */}
-            <div className="h-32 bg-gradient-to-br from-purple-50 to-indigo-50 flex items-center justify-center p-4">
+            style={{
+                position: 'relative',
+                overflow: 'hidden',
+                backgroundColor: '#ffffff',
+                border: '1px solid #000000',
+                borderRadius: 0,
+            }}
+        >
+            {/* ── Preview area ── */}
+            {/* DESIGN.md: no gradient fills, flat #f5f5f5 surface */}
+            <div
+                style={{
+                    height: '112px',
+                    backgroundColor: '#f5f5f5',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderBottom: '1px solid #e2e8f0',
+                }}
+            >
                 {getFileIcon(file)}
             </div>
-            {/* file visibility badge */}
-            <div className="absolute top-2 right-2">
-                <div className={`rounded-full p-1.5 ${file.public ? 'bg-green-100' : 'bg-gray-100'}`} title={file.public ? "Public" : "Private"}>
-                    {file.public ? (
-                            <GlobeIcon size={14} className="text-green-600" /> 
-                        ):(
-                             <LockIcon size={14} className="text-gray-600" />
-                        )}
-                </div>
-            </div>
-            {/* file details */}
-            <div className="p-4">
-                <div className="flex justify-between items-start">
-                    <div className="overflow-hidden">
-                        <h3 
-                            title={file.name}
-                            className="font-medium text-gray-900 truncate">{file.name}
-                        </h3>
-                        <p className="text-xs text-gray-600 mt-1">
-                            {formatFileSize(file.size)} | {formatDate(file.uploadedAt)}
-                        </p>
-                    </div>
-                </div>
-            </div>
-            {/* action buttons */}
-            <div className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent flex items-end justify-center p-4 transition-opacity duration-300 ${showActions ? 'opacity-100' : 'opacity-0'}`}>
-                    <div className="flex gap-3 w-full justify-center">
-                        {file.visibility === "public" && (
-                            <button 
-                                onClick={() => onShareLink(file.id)}
-                                title="Share"    
-                                className="p-2 bg-white/90 rounded-full hover:bg-white cursor-pointer transition-colors text-purple-500 hover:text-purple-600">
-                                <Copy size={18} />
-                            </button>
-                        )}
-                        {file.visibility === "public" && (
-                            <a href={`/file/${file.id}`} title="View File" target="_blank" rel="norefferer" className="p-2 bg-white/90 rounded-full hover:bg-white transition-colors text-gray-700 hover:text-gray-900">
-                                <EyeIcon size={18} />
-                            </a>
-                        )}
 
-                        <button 
-                            onClick={() => onDownload(file)}
-                            title="Download"
-                            className="p-2 bg-white/90 rounded-full hover:bg-white cursor-pointer transition-colors text-green-600 hover:text-green-700">
-                            <DownloadIcon size={18} />
-                        </button>
-                        <button
-                            onClick={() => onTogglePublic(file)}
-                            title={file.public ? "Make Private" : "Make Public"}
-                            className="p-2 bg-white/90 rounded-full hover:bg-white cursor-pointer transition-colors text-amber-600 hover:text-amber-700"   
-                        >
-                            {file.public ? <LockIcon size={18} /> : <GlobeIcon size={18} />}
-                        </button>
-                        <button
-                            onClick={() => onDelete(file.id)}
-                            title="Delete" 
-                            className="p-2 bg-white/90 rounded-full hover:bg-white cursor-pointer transition-colors text-red-600 hover:text-red-700">
-                            <TrashIcon size={18} />
-                        </button>
-                    </div>
+            {/* ── Visibility badge ── */}
+            {/* DESIGN.md: pill (border-radius 1920px) only for inline text tags */}
+            <div style={{ position: 'absolute', top: '8px', right: '8px' }}>
+                <span
+                    className="font-mono uppercase"
+                    style={{
+                        fontSize: '0.63rem',
+                        fontWeight: 700,
+                        letterSpacing: '1.2px',
+                        color: '#ffffff',
+                        backgroundColor: '#000000',
+                        borderRadius: '1920px',
+                        padding: '2px 7px',
+                        lineHeight: 1.6,
+                    }}
+                >
+                    {getVisibilityLabel(file.visibility)}
+                </span>
+            </div>
+
+            {/* ── File details ── */}
+            <div style={{ padding: '12px 12px 10px' }}>
+                {/* File name — UI font */}
+                <p
+                    className="font-ui"
+                    title={file.name}
+                    style={{
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        color: '#1a1a1a',
+                        letterSpacing: '0.108px',
+                        lineHeight: 1.23,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        marginBottom: '4px',
+                    }}
+                >
+                    {file.name}
+                </p>
+
+                {/* Size + date — mono meta */}
+                <p
+                    className="font-mono uppercase"
+                    style={{
+                        fontSize: '0.63rem',
+                        letterSpacing: '1.1px',
+                        color: '#757575',
+                        lineHeight: 1.33,
+                        margin: 0,
+                    }}
+                >
+                    {formatFileSize(file.size)} · {formatDate(file.uploadedAt)}
+                </p>
+            </div>
+
+            {/* ── Hover action strip ── */}
+            {/* DESIGN.md: depth via solid black bar at bottom, not gradient scrim */}
+            <div
+                style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    backgroundColor: '#000000',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px',
+                    padding: '8px',
+                    opacity: showActions ? 1 : 0,
+                    transition: 'opacity 120ms',
+                }}
+            >
+                {/* Round icon buttons — DESIGN.md: 50% radius ONLY for icon controls */}
+                {file.visibility === 'public' && (
+                    <IconBtn onClick={() => onShareLink(file.id)} title="Share link">
+                        <Copy size={14} strokeWidth={2} />
+                    </IconBtn>
+                )}
+                {file.visibility === 'public' && (
+                    <a
+                        href={`/file/${file.id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        title="View file"
+                        style={roundBtnStyle}
+                    >
+                        <EyeIcon size={14} strokeWidth={2} />
+                    </a>
+                )}
+                <IconBtn onClick={() => onDownload(file)} title="Download">
+                    <DownloadIcon size={14} strokeWidth={2} />
+                </IconBtn>
+                {onManageVisibility && (
+                    <IconBtn onClick={() => onManageVisibility(file)} title="Manage visibility">
+                        <Shield size={14} strokeWidth={2} />
+                    </IconBtn>
+                )}
+                <IconBtn onClick={() => onDelete(file.id)} title="Delete" danger>
+                    <TrashIcon size={14} strokeWidth={2} />
+                </IconBtn>
             </div>
         </div>
-    )
-}
+    );
+};
+
+/** Round icon button — DESIGN.md: 50% radius for icon controls only */
+const roundBtnStyle = {
+    background: 'rgba(255,255,255,0.12)',
+    border: '1px solid rgba(255,255,255,0.35)',
+    borderRadius: '50%',
+    width: '30px',
+    height: '30px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#ffffff',
+    cursor: 'pointer',
+    flexShrink: 0,
+    textDecoration: 'none',
+};
+
+const IconBtn = ({ children, onClick, title, danger }) => {
+    const [hovered, setHovered] = useState(false);
+    return (
+        <button
+            onClick={onClick}
+            title={title}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+            style={{
+                ...roundBtnStyle,
+                backgroundColor: hovered
+                    ? (danger ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.25)')
+                    : 'rgba(255,255,255,0.12)',
+                transition: 'background-color 120ms',
+            }}
+        >
+            {children}
+        </button>
+    );
+};
 
 export default FileCard;

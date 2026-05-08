@@ -1,24 +1,59 @@
-import {useClerk} from "@clerk/clerk-react";
-
 const CTASection = ({ isSignedIn, navigate }) => {
-    const {openSignUp} = useClerk();
+    const handleCTA = () => {
+        if (isSignedIn) {
+            navigate("/dashboard");
+        } else {
+            navigate("/sign-up");
+        }
+    };
+
     return (
-        <div className="bg-purple-600">
-            <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:py-24 lg:px-8 lg:flex lg:items-center lg:justify-between">
-                <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-                        <span className="block mb-2">Ready to get started?</span>
-                        <span className="block text-purple-100 text-3xl sm:text-4xl">Create your account today</span>
-                </h2>
-                <div className="mt-10 lg:mt-0 flex lg:flex-shrink-0">
-                    <button 
-                        onClick={() => isSignedIn ? navigate('/dashboard') : openSignUp()}
-                        className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold rounded-lg text-purple-600 bg-white hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-                        Sign up for free
-                    </button>
+        <section id="cta" className="bg-ink border-b border-ink">
+            <div className="max-w-editorial mx-auto px-4 sm:px-6 lg:px-16">
+                <div className="py-16 flex flex-wrap items-start justify-between gap-10">
+
+                    {/* Left: headline */}
+                    <div className="flex-1 min-w-[300px]">
+                        <p className="font-mono text-[0.81rem] tracking-kicker uppercase text-white/50 leading-kicker mb-4">
+                            Get Started Today
+                        </p>
+                        <h2 className="font-display font-normal text-[3rem] sm:text-[4rem] leading-hero tracking-hero text-paper max-w-lg">
+                            Ready to vault your files?
+                        </h2>
+                    </div>
+
+                    {/* Right: deck + buttons */}
+                    <div className="flex-1 min-w-[260px] flex flex-col justify-end self-end gap-6">
+                        <p className="font-body text-[1.19rem] leading-deck text-white/70">
+                            Create your account in seconds. No credit card required for the
+                            free tier. Start sharing files that are actually secure.
+                        </p>
+
+                        <div className="flex flex-wrap gap-3 items-center">
+                            {/* Inverted secondary button on dark surface */}
+                            <button
+                                id="cta-final-signup"
+                                onClick={handleCTA}
+                                className="font-ui font-bold text-base tracking-btn text-ink bg-paper border-2 border-paper px-6 py-3 rounded-none cursor-pointer hover:bg-transparent hover:text-paper transition-colors duration-150"
+                            >
+                                {isSignedIn ? "Go to Dashboard" : "Create Free Account"}
+                            </button>
+
+                            {!isSignedIn && (
+                                <a
+                                    href="#pricing"
+                                    className="font-ui font-bold text-base tracking-btn text-white/70 underline hover:text-link-blue transition-colors duration-[120ms] py-3"
+                                >
+                                    View Pricing Plans
+                                </a>
+                            )}
+                        </div>
+                    </div>
+
                 </div>
             </div>
-        </div>
+        </section>
     );
-}
+};
 
 export default CTASection;

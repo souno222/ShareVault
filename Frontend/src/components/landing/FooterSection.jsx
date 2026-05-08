@@ -1,21 +1,85 @@
 const FooterSection = () => {
+    const productLinks = [
+        { label: "Features", href: "#features" },
+        { label: "Pricing", href: "#pricing" },
+        { label: "Testimonials", href: "#testimonials" },
+    ];
+    const legalLinks = [
+        { label: "Privacy Policy", href: "#" },
+        { label: "Terms of Service", href: "#" },
+        { label: "Cookie Policy", href: "#" },
+    ];
+
     return (
-        <footer className="bg-gray-900">
-            <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-                <div className="border-t border-gray-800 pt-8">
-                    <div className="flex flex-col md:flex-row justify-between items-center">
-                        <div className="mb-4 md:mb-0">
-                            <h3 className="text-2xl font-bold text-white mb-2">CloudShare</h3>
-                            <p className="text-gray-400 text-sm">Secure file sharing made simple</p>
+        <footer id="footer" className="bg-page-ink border-t-2 border-ink">
+            <div className="max-w-editorial mx-auto px-4 sm:px-6 lg:px-16">
+
+                {/* ── TOP: Wordmark + nav columns ── */}
+                <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-10 lg:gap-16 pt-12 pb-10 border-b border-white/15">
+
+                    {/* Nav grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+                        {/* Product */}
+                        <div>
+                            <p className="font-mono font-bold text-[0.75rem] tracking-ribbon uppercase text-paper leading-none pb-2 mb-4 border-b border-white/20">
+                                Product
+                            </p>
+                            <nav className="flex flex-col gap-2.5">
+                                {productLinks.map((link, i) => (
+                                    <a
+                                        key={i}
+                                        href={link.href}
+                                        className="font-ui text-[0.69rem] leading-[1.45] text-paper hover:text-link-blue transition-colors duration-[120ms] no-underline"
+                                    >
+                                        {link.label}
+                                    </a>
+                                ))}
+                            </nav>
                         </div>
-                        <p className="text-base text-gray-400">
-                            &copy; 2025 CloudShare. All rights reserved.
+
+                        {/* Legal */}
+                        <div>
+                            <p className="font-mono font-bold text-[0.75rem] tracking-ribbon uppercase text-paper leading-none pb-2 mb-4 border-b border-white/20">
+                                Legal
+                            </p>
+                            <nav className="flex flex-col gap-2.5">
+                                {legalLinks.map((link, i) => (
+                                    <a
+                                        key={i}
+                                        href={link.href}
+                                        className="font-ui text-[0.69rem] leading-[1.45] text-paper hover:text-link-blue transition-colors duration-[120ms] no-underline"
+                                    >
+                                        {link.label}
+                                    </a>
+                                ))}
+                            </nav>
+                        </div>
+
+
+                    </div>
+                    <div>
+                        <h1 className="font-display font-bold text-[5rem] tracking-hero text-paper mb-2 leading-none">
+                            ShareVault
+                        </h1>
+                        <p className="font-body text-sm leading-[1.5] text-white/55 max-w-[200px]">
+                            Secure file sharing made simple and trustworthy.
                         </p>
                     </div>
                 </div>
+
+                {/* ── BOTTOM: copyright ── */}
+                <div className="flex flex-wrap justify-between items-center gap-2 py-5">
+                    <p className="font-mono text-[0.75rem] tracking-meta uppercase text-white/35">
+                        © {new Date().getFullYear()} ShareVault. All rights reserved.
+                    </p>
+                    <p className="font-mono text-[0.75rem] tracking-meta uppercase text-white/25">
+                        Designed with editorial restraint.
+                    </p>
+                </div>
+
             </div>
         </footer>
     );
-}
+};
 
 export default FooterSection;

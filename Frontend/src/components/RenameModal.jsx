@@ -1,95 +1,156 @@
-import { useState, useEffect, useRef } from "react";
-import { X, Edit } from "lucide-react";
+import { useState, useEffect, useRef } from 'react';
+import Modal from './Modal';
+import { WiredButton } from './Modal';
+import { Edit3 } from 'lucide-react';
 
+/**
+ * RenameModal — WIRED design system
+ * ─────────────────────────────────
+ * • Uses shared Modal shell (black ribbon header, 2px border, 0 radius)
+ * • Input: 2px solid #000, no radius, Apercu 16px placeholder
+ * • Buttons: WiredButton (2px border, inversion on hover)
+ * • No color outside #000 / #1a1a1a / #757575 / #e2e8f0 / #fff / #057dbc
+ */
 const RenameModal = ({ isOpen, onClose, onRename, currentFileName }) => {
-    const [newName, setNewName] = useState("");
-    const inputRef = useRef(null);
+    const [newName, setNewName]   = useState('');
+    const [focused, setFocused]   = useState(false);
+    const inputRef                = useRef(null);
 
     useEffect(() => {
         if (isOpen && currentFileName) {
-            // Extract name without extension
-            const lastDotIndex = currentFileName.lastIndexOf('.');
-            const nameWithoutExt = lastDotIndex !== -1 
-                ? currentFileName.substring(0, lastDotIndex)
-                : currentFileName;
-            
             setNewName(currentFileName);
-            
-            // Focus and select the name part (without extension)
             setTimeout(() => {
                 if (inputRef.current) {
                     inputRef.current.focus();
-                    inputRef.current.setSelectionRange(0, nameWithoutExt.length);
+                    const lastDot = currentFileName.lastIndexOf('.');
+                    const selectEnd = lastDot > 0 ? lastDot : currentFileName.length;
+                    inputRef.current.setSelectionRange(0, selectEnd);
                 }
-            }, 100);
+            }, 80);
         }
     }, [isOpen, currentFileName]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (newName.trim() && newName !== currentFileName) {
-            onRename(newName.trim());
+        const trimmed = newName.trim();
+        if (trimmed && trimmed !== currentFileName) {
+            onRename(trimmed);
         }
     };
 
     const handleClose = () => {
-        setNewName("");
+        setNewName('');
         onClose();
     };
 
-    if (!isOpen) return null;
+    const canSubmit = newName.trim() && newName.trim() !== currentFileName;
 
     return (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 relative">
-                <button
-                    onClick={handleClose}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+        <Modal
+            isOpen={isOpen}
+            onClose={handleClose}
+            title="Rename File"
+            size="sm"
+        >
+            <form onSubmit={handleSubmit}>
+                {/* ── Field label — WiredMono kicker style ── */}
+                <label
+                    htmlFor="rename-input"
+                    style={{
+                        display: 'block',
+                        fontFamily: 'WiredMono, "Courier New", Courier, monospace',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        letterSpacing: '0.92px',
+                        textTransform: 'uppercase',
+                        color: '#757575',
+                        marginBottom: '8px',
+                    }}
                 >
-                    <X size={20} />
-                </button>
+                    New File Name
+                </label>
 
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <Edit size={20} className="text-blue-600" />
-                    </div>
-                    <h2 className="text-xl font-semibold text-gray-800">Rename File</h2>
+                {/* ── Input — 2px solid #000, 0 radius, no glow ── */}
+                <div style={{ position: 'relative', marginBottom: '8px' }}>
+                    <Edit3
+                        size={15}
+                        style={{
+                            position: 'absolute',
+                            left: '12px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            color: focused ? '#000000' : '#757575',
+                            transition: 'color 120ms',
+                            pointerEvents: 'none',
+                        }}
+                    />
+                    <input
+                        id="rename-input"
+                        ref={inputRef}
+                        type="text"
+                        value={newName}
+                        onChange={e => setNewName(e.target.value)}
+                        onFocus={() => setFocused(true)}
+                        onBlur={() => setFocused(false)}
+                        placeholder="Enter new file name"
+                        style={{
+                            width: '100%',
+                            boxSizing: 'border-box',
+                            paddingLeft: '36px',
+                            paddingRight: '12px',
+                            paddingTop: '11px',
+                            paddingBottom: '11px',
+                            fontFamily: 'Apercu, Inter, Work Sans, sans-serif',
+                            fontSize: '0.875rem',
+                            color: '#1a1a1a',
+                            backgroundColor: '#ffffff',
+                            border: `2px solid ${focused ? '#000000' : '#e2e8f0'}`,
+                            borderRadius: 0,          // square is law
+                            outline: 'none',
+                            transition: 'border-color 120ms',
+                        }}
+                    />
                 </div>
 
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-6">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            New File Name
-                        </label>
-                        <input
-                            ref={inputRef}
-                            type="text"
-                            value={newName}
-                            onChange={(e) => setNewName(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                            placeholder="Enter new file name"
-                        />
-                    </div>
+                {/* Current name hint */}
+                {currentFileName && (
+                    <p
+                        style={{
+                            fontFamily: 'WiredMono, "Courier New", Courier, monospace',
+                            fontSize: '0.69rem',
+                            letterSpacing: '0.6px',
+                            textTransform: 'uppercase',
+                            color: '#757575',
+                            marginBottom: '24px',
+                            marginTop: '4px',
+                        }}
+                    >
+                        Current: {currentFileName}
+                    </p>
+                )}
 
-                    <div className="flex gap-3 justify-end">
-                        <button
-                            type="button"
-                            onClick={handleClose}
-                            className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={!newName.trim() || newName === currentFileName}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-                        >
-                            Rename
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+                {/* ── Hairline divider ── */}
+                <div style={{ borderTop: '1px solid #e2e8f0', marginBottom: '16px' }} />
+
+                {/* ── Action buttons — right-aligned, WiredButton ── */}
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                    <WiredButton
+                        type="button"
+                        variant="secondary"
+                        onClick={handleClose}
+                    >
+                        Cancel
+                    </WiredButton>
+                    <WiredButton
+                        type="submit"
+                        variant="primary"
+                        disabled={!canSubmit}
+                    >
+                        Rename
+                    </WiredButton>
+                </div>
+            </form>
+        </Modal>
     );
 };
 

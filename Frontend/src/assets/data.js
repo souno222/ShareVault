@@ -1,35 +1,35 @@
-import { LayoutDashboard,UploadIcon,Files,Receipt,CreditCard,Bookmark} from "lucide-react";
+import { LayoutDashboard, UploadIcon, Files, Receipt, CreditCard, Bookmark } from "lucide-react";
 
-export const features =[
+export const features = [
     {
-        iconName:"ArrowUpCircle",
-        iconColor:"text-blue-500",
-        title:"Upload Files",
-        description:"Easily upload and manage your files with our intuitive interface.",
+        iconName: "ArrowUpCircle",
+        iconColor: "text-blue-500",
+        title: "Upload Files",
+        description: "Easily upload and manage your files with our intuitive interface.",
     },
     {
-        iconName:"FolderOpen",
-        iconColor:"text-green-500",
-        title:"Organize Files",
-        description:"Keep your files organized with folders and tags for easy access.",
+        iconName: "FolderOpen",
+        iconColor: "text-green-500",
+        title: "Organize Files",
+        description: "Keep your files organized with folders and tags for easy access.",
     },
     {
-        iconName:"Share2",
-        iconColor:"text-yellow-500",
-        title:"Share Files",
-        description:"Share files securely with others using unique links.",
+        iconName: "Share2",
+        iconColor: "text-yellow-500",
+        title: "Share Files",
+        description: "Share files securely with others using unique links.",
     },
     {
-        iconName:"Lock",
-        iconColor:"text-red-500",
-        title:"Secure Storage",
-        description:"Your files are stored securely with encryption and access controls.",
+        iconName: "Lock",
+        iconColor: "text-red-500",
+        title: "Secure Storage",
+        description: "Your files are stored securely with encryption and access controls.",
     },
     {
-        iconName:"Money",
-        iconColor:"text-purple-500",
-        title:"Version History",
-        description:"Track changes and restore previous versions of your files.",
+        iconName: "Money",
+        iconColor: "text-purple-500",
+        title: "Version History",
+        description: "Track changes and restore previous versions of your files.",
     }
 ]
 export const pricingPlans = [
@@ -48,7 +48,7 @@ export const pricingPlans = [
     },
     {
         name: "Premium",
-        price: "50/month",
+        price: "50",
         description: "Includes advanced features and priority support.",
         highlighted: true,
         features: [
@@ -56,12 +56,12 @@ export const pricingPlans = [
             "File organization",
             "Priority sharing options"
         ],
-        cta: "Go Premium",  
+        cta: "Go Premium",
         recommended: true
     },
     {
         name: "Ultimate",
-        price: "120/month",
+        price: "75",
         description: "Custom solutions for businesses with dedicated support.",
         highlighted: false,
         features: [
@@ -98,43 +98,43 @@ export const testimonials = [
     }
 ];
 
-export const SIDE_MENU_DATA=[
-    { 
+export const SIDE_MENU_DATA = [
+    {
         id: "01",
-        label:"Dashboard",
+        label: "Dashboard",
         icon: LayoutDashboard,
-        path:"/dashboard",
+        path: "/dashboard",
     },
     {
         id: "02",
-        label:"Upload",
+        label: "Upload",
         icon: UploadIcon,
-        path:"/upload",
+        path: "/upload",
     },
     {
         id: "03",
-        label:"My Files",
-        icon:Files,
-        path:"/my-files",
+        label: "My Files",
+        icon: Files,
+        path: "/my-files",
     },
     {
         id: "04",
-        label:"Saved Files",
-        icon:Bookmark,
-        path:"/saved-files",
+        label: "Saved Files",
+        icon: Bookmark,
+        path: "/saved-files",
 
     },
     {
         id: "05",
-        label:"Subscription",
+        label: "Subscription",
         icon: CreditCard,
-        path:"/subscription",
+        path: "/subscription",
     },
-    { 
+    {
         id: "06",
-        label:"Transactions",
+        label: "Transactions",
         icon: Receipt,
-        path:"/transactions"
+        path: "/transactions"
     }
 ];
 

@@ -1,62 +1,124 @@
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 
-const Modal = ({ 
-    isOpen, 
-    onClose, 
-    children, 
+/**
+ * WIRED-system Modal
+ * ─────────────────────────────────────────────────────────────────
+ * Rules applied (DESIGN.md §4, §6):
+ *  • border-radius: 0 on panel, inputs, and buttons — square is law
+ *  • No box-shadow — depth = 2px solid #000 border (level-3 elevation)
+ *  • Header = full black ribbon (level-4 elevation) with WiredMono ALL-CAPS label
+ *  • Backdrop = solid rgba(0,0,0,0.55), no blur, no gradient
+ *  • Primary button: white bg + 2px #000 border → inverts on hover (150ms)
+ *  • Secondary button: black bg + 2px #000 border → white text always
+ *  • Close button: round 50% — the ONLY circular shape on a WIRED panel
+ *  • Colors: only #000, #1a1a1a, #757575, #e2e8f0, #fff, #057dbc
+ */
+
+/* ─── Reusable WIRED button ──────────────────────────────────────── */
+export const WiredButton = ({
+    children,
+    onClick,
+    disabled = false,
+    variant = 'primary',   // 'primary' | 'secondary' | 'danger'
+    type = 'button',
+    fullWidth = false,
+}) => {
+    const [hovered, setHovered] = useState(false);
+
+    const styles = {
+        primary: {
+            base:  { bg: '#ffffff', color: '#000000', border: '#000000' },
+            hover: { bg: '#000000', color: '#ffffff' },
+        },
+        secondary: {
+            base:  { bg: '#ffffff', color: '#1a1a1a', border: '#000000' },
+            hover: { bg: '#1a1a1a', color: '#ffffff' },
+        },
+        danger: {
+            base:  { bg: '#ffffff', color: '#000000', border: '#000000' },
+            hover: { bg: '#1a1a1a', color: '#ffffff' },
+        },
+    };
+
+    const { base, hover } = styles[variant] || styles.primary;
+    const active = hovered && !disabled;
+
+    return (
+        <button
+            type={type}
+            onClick={onClick}
+            disabled={disabled}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+            style={{
+                padding: '10px 20px',
+                fontSize: '0.875rem',        // Apercu UI label
+                fontFamily: 'Apercu, Inter, Work Sans, sans-serif',
+                fontWeight: 700,
+                letterSpacing: '0.3px',
+                lineHeight: 1.25,
+                border: `2px solid ${base.border}`,
+                borderRadius: 0,             // square is law
+                backgroundColor: active ? hover.bg : base.bg,
+                color: active ? hover.color : base.color,
+                cursor: disabled ? 'not-allowed' : 'pointer',
+                opacity: disabled ? 0.45 : 1,
+                transition: 'background-color 150ms, color 150ms',
+                width: fullWidth ? '100%' : undefined,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                whiteSpace: 'nowrap',
+            }}
+        >
+            {children}
+        </button>
+    );
+};
+
+/* ─── Modal shell ────────────────────────────────────────────────── */
+const Modal = ({
+    isOpen,
+    onClose,
+    children,
     title,
-    confirmText = "Confirm",
-    cancelText = "Cancel",
+    confirmText = 'Confirm',
+    cancelText = 'Cancel',
     onConfirm,
-    confirmationButtonClass = "bg-red-600 hover:bg-red-700",
-    size = "md",
+    size = 'md',
     showCloseButton = true,
-    closeOnOverlayClick = true
+    closeOnOverlayClick = true,
 }) => {
     const [isConfirming, setIsConfirming] = useState(false);
 
-    // Close modal on Escape key press
+    /* Escape key */
     useEffect(() => {
-        const handleEscape = (e) => {
-            if (e.key === 'Escape' && isOpen) {
-                onClose();
-            }
-        };
-
-        document.addEventListener('keydown', handleEscape);
-        return () => document.removeEventListener('keydown', handleEscape);
+        const handler = (e) => { if (e.key === 'Escape' && isOpen) onClose(); };
+        document.addEventListener('keydown', handler);
+        return () => document.removeEventListener('keydown', handler);
     }, [isOpen, onClose]);
 
-    // Prevent body scroll when modal is open
+    /* Body scroll lock */
     useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
-        }
-
-        return () => {
-            document.body.style.overflow = 'unset';
-        };
+        document.body.style.overflow = isOpen ? 'hidden' : 'unset';
+        return () => { document.body.style.overflow = 'unset'; };
     }, [isOpen]);
 
-    // Reset confirming state when modal is reopened
+    /* Reset confirming state on re-open */
     useEffect(() => {
-        if (isOpen) {
-            setIsConfirming(false);
-        }
+        if (isOpen) setIsConfirming(false);
     }, [isOpen]);
 
     if (!isOpen) return null;
 
-    // Size classes
-    const sizeClasses = {
-        sm: 'max-w-sm',
-        md: 'max-w-md',
-        lg: 'max-w-lg',
-        xl: 'max-w-xl',
-        '2xl': 'max-w-2xl'
+    const maxWidths = {
+        sm: '420px',
+        md: '520px',
+        lg: '640px',
+        xl: '760px',
+        '2xl': '920px',
     };
 
     const handleConfirm = async () => {
@@ -65,68 +127,145 @@ const Modal = ({
             try {
                 await onConfirm();
                 onClose();
-            } catch (error) {
+            } catch {
                 setIsConfirming(false);
             }
         }
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            {/* Backdrop/Overlay */}
-            <div 
-                className="fixed inset-0 bg-black/30 backdrop-blur-sm" 
+        /* DESIGN.md: no blur, no gradient — solid translucent overlay only */
+        <div
+            style={{
+                position: 'fixed', inset: 0, zIndex: 50,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: '16px',
+            }}
+        >
+            {/* ── Backdrop ── */}
+            <div
+                style={{
+                    position: 'fixed', inset: 0,
+                    backgroundColor: 'rgba(0,0,0,0.55)',
+                }}
                 onClick={closeOnOverlayClick ? onClose : undefined}
             />
-            
-            {/* Modal Content */}
-            <div 
-                className={`relative bg-white rounded-lg shadow-xl ${sizeClasses[size]} w-full transform transition-all z-10`}
+
+            {/* ── Panel — 2px black border, 0 radius, no shadow ── */}
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-label={title}
                 onClick={(e) => e.stopPropagation()}
+                style={{
+                    position: 'relative',
+                    zIndex: 10,
+                    backgroundColor: '#ffffff',
+                    border: '2px solid #000000',
+                    borderRadius: 0,
+                    width: '100%',
+                    maxWidth: maxWidths[size] || maxWidths.md,
+                    maxHeight: 'calc(100vh - 32px)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflowY: 'auto',
+                }}
             >
-                {/* Modal Header */}
+                {/* ── Header ribbon — level-4 elevation, WiredMono ALL-CAPS ── */}
                 {(title || showCloseButton) && (
-                    <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '10px 16px',
+                            backgroundColor: '#000000',
+                            flexShrink: 0,
+                        }}
+                    >
                         {title && (
-                            <h3 className="text-lg font-medium text-gray-900">
+                            <span
+                                style={{
+                                    fontFamily: 'WiredMono, "Courier New", Courier, monospace',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 700,
+                                    letterSpacing: '1.2px',
+                                    textTransform: 'uppercase',
+                                    color: '#ffffff',
+                                    lineHeight: 1,
+                                }}
+                            >
                                 {title}
-                            </h3>
+                            </span>
                         )}
+
                         {showCloseButton && (
+                            /* DESIGN.md: round icon button — the ONLY circular shape */
                             <button
                                 onClick={onClose}
-                                className="text-gray-400 hover:text-gray-600 transition-colors"
                                 disabled={isConfirming}
+                                aria-label="Close"
+                                style={{
+                                    background: 'transparent',
+                                    border: '1px solid rgba(255,255,255,0.4)',
+                                    borderRadius: '50%',
+                                    width: '28px',
+                                    height: '28px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: isConfirming ? 'not-allowed' : 'pointer',
+                                    color: '#ffffff',
+                                    opacity: isConfirming ? 0.4 : 1,
+                                    transition: 'border-color 120ms',
+                                    flexShrink: 0,
+                                    marginLeft: '12px',
+                                    padding: 0,
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.borderColor = '#ffffff'; }}
+                                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.4)'; }}
                             >
-                                <X size={24} />
+                                <X size={13} strokeWidth={2} />
                             </button>
                         )}
                     </div>
                 )}
 
-                {/* Modal Content */}
-                <div className={title || showCloseButton ? "p-6 pt-4" : "p-6"}>
+                {/* ── Body ── */}
+                <div style={{ padding: '24px', flex: 1 }}>
                     {children}
                 </div>
 
-                {/* Modal Actions (for confirmation dialogs) */}
+                {/* ── Footer buttons — hard hairline above, right-aligned ── */}
                 {onConfirm && (
-                    <div className="flex gap-3 justify-end p-6 pt-0">
-                        <button
-                            onClick={onClose}
-                            disabled={isConfirming}
-                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    <>
+                        {/* Hairline separator — level-1 elevation */}
+                        <div style={{ borderTop: '1px solid #e2e8f0', flexShrink: 0 }} />
+                        <div
+                            style={{
+                                display: 'flex',
+                                gap: '12px',
+                                justifyContent: 'flex-end',
+                                padding: '16px 24px',
+                                flexShrink: 0,
+                            }}
                         >
-                            {cancelText}
-                        </button>
-                        <button
-                            onClick={handleConfirm}
-                            disabled={isConfirming}
-                            className={`px-4 py-2 text-sm font-medium text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${confirmationButtonClass}`}
-                        >
-                            {isConfirming ? 'Processing...' : confirmText}
-                        </button>
-                    </div>
+                            <WiredButton
+                                onClick={onClose}
+                                disabled={isConfirming}
+                                variant="secondary"
+                            >
+                                {cancelText}
+                            </WiredButton>
+                            <WiredButton
+                                onClick={handleConfirm}
+                                disabled={isConfirming}
+                                variant="primary"
+                            >
+                                {isConfirming ? 'Working…' : confirmText}
+                            </WiredButton>
+                        </div>
+                    </>
                 )}
             </div>
         </div>

@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
 
+/**
+ * WIRED-system VideoViewer
+ * - Pure black (#000) stage — the only acceptable non-white background
+ *   for a video container (it IS the medium)
+ * - Square corners, no shadow, no rounded wrapper
+ */
 const VideoViewer = ({ blob, fileName }) => {
     const [videoUrl, setVideoUrl] = useState(null);
 
@@ -7,25 +13,49 @@ const VideoViewer = ({ blob, fileName }) => {
         if (blob) {
             const url = URL.createObjectURL(blob);
             setVideoUrl(url);
-
-            return () => {
-                URL.revokeObjectURL(url);
-            };
+            return () => URL.revokeObjectURL(url);
         }
     }, [blob]);
 
     return (
-        <div className="flex items-center justify-center bg-black rounded-lg p-4 min-h-[400px]">
+        /* DESIGN.md: black (#000) only for video stage — printerly, not atmospheric */
+        <div
+            style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "#000000",
+                minHeight: "400px",
+                borderRadius: 0,
+            }}
+        >
             {videoUrl ? (
-                <video 
-                    controls 
-                    className="max-w-full max-h-[600px] rounded-lg"
+                <video
+                    controls
                     src={videoUrl}
+                    style={{
+                        maxWidth: "100%",
+                        maxHeight: "600px",
+                        borderRadius: 0,
+                        display: "block",
+                    }}
                 >
                     Your browser does not support the video tag.
                 </video>
             ) : (
-                <div className="text-white">Loading video...</div>
+                /* DESIGN.md: mono kicker for status labels */
+                <p
+                    className="font-mono uppercase"
+                    style={{
+                        fontSize: "0.69rem",
+                        fontWeight: 700,
+                        letterSpacing: "1.2px",
+                        color: "#757575",
+                        lineHeight: 1,
+                    }}
+                >
+                    Loading video…
+                </p>
             )}
         </div>
     );

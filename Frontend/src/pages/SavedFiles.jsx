@@ -1,41 +1,145 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import DashboardLayout from "../layout/DashboardLayout";
-import { useAuth } from "@clerk/clerk-react";
-import axios from "axios";
-import { apiEndpoints } from "../util/apiendpoints";
-import toast from "react-hot-toast";
-import { ListIcon, GridIcon, BookmarkIcon, Image, Video, Music, FileText, FileIcon, Eye, DownloadIcon, BookmarkX } from "lucide-react";
-import Modal from "../components/Modal";
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import DashboardLayout from '../layout/DashboardLayout';
+import { useAuth } from '@clerk/clerk-react';
+import axios from 'axios';
+import { apiEndpoints } from '../util/apiendpoints';
+import toast from 'react-hot-toast';
+import {
+    ListIcon, GridIcon, BookmarkIcon, BookmarkX,
+    Eye, Image, Video, Music, FileText, FileIcon,
+} from 'lucide-react';
+import Modal from '../components/Modal';
 
+/* ─── helpers ─────────────────────────────────────── */
+
+const getFileIcon = (fileName) => {
+    const ext = fileName.split('.').pop().toLowerCase();
+    const s = { color: '#1a1a1a' };
+    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'].includes(ext))
+        return <Image size={28} strokeWidth={1.5} style={s} />;
+    if (['mp4', 'mkv', 'webm', 'avi', 'mov'].includes(ext))
+        return <Video size={28} strokeWidth={1.5} style={s} />;
+    if (['mp3', 'wav', 'flac', 'aac'].includes(ext))
+        return <Music size={28} strokeWidth={1.5} style={s} />;
+    if (['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt'].includes(ext))
+        return <FileText size={28} strokeWidth={1.5} style={s} />;
+    return <FileIcon size={28} strokeWidth={1.5} style={s} />;
+};
+
+const getSmallFileIcon = (fileName) => {
+    const ext = fileName.split('.').pop().toLowerCase();
+    const s = { color: '#1a1a1a' };
+    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'].includes(ext)) return <Image size={18} strokeWidth={1.5} style={s} />;
+    if (['mp4', 'mkv', 'webm', 'avi', 'mov'].includes(ext)) return <Video size={18} strokeWidth={1.5} style={s} />;
+    if (['mp3', 'wav', 'flac', 'aac'].includes(ext)) return <Music size={18} strokeWidth={1.5} style={s} />;
+    if (['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt'].includes(ext)) return <FileText size={18} strokeWidth={1.5} style={s} />;
+    return <FileIcon size={18} strokeWidth={1.5} style={s} />;
+};
+
+const formatFileSize = (sizeString) => {
+    if (typeof sizeString === 'string' && sizeString.includes(' ')) return sizeString;
+    const bytes = parseFloat(sizeString);
+    if (!bytes || bytes === 0) return '0 B';
+    const kb = bytes / 1024, mb = kb / 1024, gb = mb / 1024;
+    if (gb >= 1) return gb.toFixed(2) + ' GB';
+    if (mb >= 1) return mb.toFixed(2) + ' MB';
+    if (kb >= 1) return kb.toFixed(2) + ' KB';
+    return bytes.toFixed(0) + ' B';
+};
+
+const formatDate = (dateString) =>
+    new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
+/* ─── Skeleton helpers ───────────────────────────── */
+const SkeletonRow = () => (
+    <tr>
+        {[220, 80, 100, 120, 80].map((w, i) => (
+            <td key={i} style={{ padding: '14px 16px', borderBottom: '1px solid #e2e8f0' }}>
+                <div style={{ height: '12px', width: `${w}px`, maxWidth: '100%', backgroundColor: '#e2e8f0', animation: 'pulse 1.5s ease-in-out infinite' }} />
+            </td>
+        ))}
+    </tr>
+);
+
+const SkeletonCard = () => (
+    <div style={{ border: '1px solid #000', backgroundColor: '#ffffff' }}>
+        <div style={{ height: '112px', backgroundColor: '#f0f0f0', animation: 'pulse 1.5s ease-in-out infinite' }} />
+        <div style={{ padding: '12px' }}>
+            <div style={{ height: '12px', backgroundColor: '#e2e8f0', marginBottom: '8px', animation: 'pulse 1.5s ease-in-out infinite' }} />
+            <div style={{ height: '10px', width: '60%', backgroundColor: '#e2e8f0', animation: 'pulse 1.5s ease-in-out infinite' }} />
+        </div>
+    </div>
+);
+
+/* ─── Round icon button ──────────────────────────── */
+const RoundBtn = ({ children, onClick, title, href }) => {
+    const [h, setH] = useState(false);
+    const style = {
+        background: 'transparent',
+        border: `1px solid ${h ? '#000000' : '#757575'}`,
+        borderRadius: '50%',
+        width: '30px', height: '30px',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        cursor: 'pointer',
+        color: h ? '#000000' : '#757575',
+        transition: 'color 120ms, border-color 120ms',
+        flexShrink: 0,
+        textDecoration: 'none',
+    };
+    if (href) {
+        return (
+            <a href={href} target="_blank" rel="noreferrer" title={title} style={style}
+                onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}>
+                {children}
+            </a>
+        );
+    }
+    return (
+        <button onClick={onClick} title={title} style={style}
+            onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}>
+            {children}
+        </button>
+    );
+};
+
+/* ─── Table header cell ──────────────────────────── */
+const TH = ({ children }) => (
+    <th className="font-mono uppercase" style={{ padding: '10px 16px', textAlign: 'left', fontSize: '0.63rem', fontWeight: 700, letterSpacing: '1.2px', color: '#ffffff', lineHeight: 1, whiteSpace: 'nowrap' }}>
+        {children}
+    </th>
+);
+
+const TD = ({ children, style }) => (
+    <td style={{ padding: '14px 16px', borderBottom: '1px solid #e2e8f0', verticalAlign: 'middle', ...style }}>
+        {children}
+    </td>
+);
+
+/* ═══════════════════════════════════════════════════
+   SavedFiles page
+═══════════════════════════════════════════════════ */
 const SavedFiles = () => {
     const [savedFiles, setSavedFiles] = useState([]);
-    const [viewMode, setViewMode] = useState("list");
+    const [viewMode, setViewMode] = useState('list');
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedFileId, setSelectedFileId] = useState(null);
     const [selectedFileName, setSelectedFileName] = useState('');
+    const [hoverCard, setHoverCard] = useState(null);
     const { getToken } = useAuth();
     const navigate = useNavigate();
-    
+
     const fetchSavedFiles = async () => {
         try {
             setLoading(true);
             const token = await getToken();
-            const response = await axios.get(apiEndpoints.FETCH_SAVED_FILES, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if (response.status === 200) {
-                const sortedFiles = response.data.sort((a, b) => {
-                    return new Date(b.savedAt) - new Date(a.savedAt);
-                });
-                setSavedFiles(sortedFiles);
+            const res = await axios.get(apiEndpoints.FETCH_SAVED_FILES, { headers: { Authorization: `Bearer ${token}` } });
+            if (res.status === 200) {
+                setSavedFiles(res.data.sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt)));
             }
-            else if(response.status === 429){
-                toast.error(error)
-            }
-        } catch (error) {
-            console.error('Error fetching saved files:', error);
+        } catch (err) {
+            console.error('Error fetching saved files:', err);
             toast.error('Error fetching saved files');
         } finally {
             setLoading(false);
@@ -51,298 +155,255 @@ const SavedFiles = () => {
     const removeFromSavedFiles = async () => {
         try {
             const token = await getToken();
-            const response = await axios.delete(apiEndpoints.REMOVE_FROM_SAVED(selectedFileId), {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if (response.status === 204) {
-                const successMessage = response.data?.message || 'File removed from saved files';
-                toast.success(successMessage);
-                setIsModalOpen(false); // Close modal after success
+            const res = await axios.delete(apiEndpoints.REMOVE_FROM_SAVED(selectedFileId), { headers: { Authorization: `Bearer ${token}` } });
+            if (res.status === 204) {
+                toast.success('Removed from saved files');
+                setIsModalOpen(false);
                 fetchSavedFiles();
             }
-        } catch (error) {
-            console.error('Error removing from saved files:', error);
-            const errorMessage = error.response?.data?.error || 'Error removing from saved files';
-            toast.error(errorMessage);
-            setIsModalOpen(false); // Close modal after error
+        } catch (err) {
+            console.error('Error removing saved file:', err);
+            toast.error(err.response?.data?.error || 'Error removing from saved files');
+            setIsModalOpen(false);
         }
     };
 
-    const getFileIcon = (fileName) => {
-        const extension = fileName.split('.').pop().toLowerCase();
-        if(['jpg','jpeg','png','gif','bmp','svg','webp'].includes(extension)){
-            return <Image size={24} className="text-purple-500" />;
-        }
-        if(['mp4','mkv','webm','avi','mov'].includes(extension)){
-            return <Video size={24} className="text-blue-500" />;
-        }
-        if(['mp3','wav','flac','aac'].includes(extension)){
-            return <Music size={24} className="text-green-500" />;
-        }
-        if(['pdf','doc','docx','ppt','pptx','txt'].includes(extension)){
-            return <FileText size={24} className="text-amber-500" />;
-        }
-        return <FileIcon size={24} className="text-purple-500" />;
-    };
-
-    const formatFileSize = (sizeString) => {
-        // If size is already formatted as string (e.g., "1.5 MB"), return as is
-        if (typeof sizeString === 'string' && sizeString.includes(' ')) {
-            return sizeString;
-        }
-        
-        // If size is in bytes (number)
-        const bytes = parseFloat(sizeString);
-        if (!bytes || bytes === 0) return '0 Bytes';
-        
-        const kb = bytes / 1024;
-        const mb = kb / 1024;
-        const gb = mb / 1024;
-        
-        if (gb >= 1) {
-            return gb.toFixed(2) + ' GB';
-        } else if (mb >= 1) {
-            return mb.toFixed(2) + ' MB';
-        } else if (kb >= 1) {
-            return kb.toFixed(2) + ' KB';
-        } else {
-            return bytes.toFixed(0) + ' Bytes';
-        }
-    };
-
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'short', 
-            day: 'numeric'
-        });
-    };
-
-    useEffect(() => {
-        fetchSavedFiles();
-    }, [getToken]);
+    useEffect(() => { fetchSavedFiles(); }, [getToken]);
 
     return (
         <DashboardLayout activeMenu="Saved Files">
-            <div className="p-6">
-                {/* Header */}
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold">Saved Files {savedFiles.length}</h2>
-                    <div className="flex items-center gap-3">
-                        <ListIcon
-                            onClick={() => setViewMode("list")}
-                            size={24}
-                            className={`cursor-pointer transition-colors ${viewMode === "list" ? "text-blue-600" : "text-gray-400 hover:text-gray-600"}`} 
-                        />
-                        <GridIcon
-                            size={24}
-                            onClick={() => setViewMode("grid")}
-                            className={`cursor-pointer transition-colors ${viewMode === "grid" ? "text-blue-600" : "text-gray-400 hover:text-gray-600"}`}
-                        />
-                    </div>
-                </div>
+            <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}`}</style>
 
-                {/* Loading State */}
-                {loading && (
-                    <>
-                        {viewMode === "grid" ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                                    <div key={i} className="bg-white rounded-lg shadow p-6 border border-gray-100">
-                                        <div className="flex justify-center mb-4">
-                                            <div className="w-20 h-20 bg-gray-200 rounded-lg animate-pulse"></div>
-                                        </div>
-                                        <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto mb-3 animate-pulse"></div>
-                                        <div className="space-y-2 mb-4">
-                                            <div className="h-3 bg-gray-200 rounded w-1/2 mx-auto animate-pulse"></div>
-                                            <div className="h-3 bg-gray-200 rounded w-2/3 mx-auto animate-pulse"></div>
-                                        </div>
-                                        <div className="flex gap-2 justify-center pt-3 border-t border-gray-100">
-                                            <div className="w-8 h-8 bg-gray-200 rounded-lg animate-pulse"></div>
-                                            <div className="w-8 h-8 bg-gray-200 rounded-lg animate-pulse"></div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="bg-white rounded-lg shadow">
-                                <table className="min-w-full">
-                                    <thead className="bg-gray-50 border-b border-gray-200">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Saved At</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner Name</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-200">
-                                        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                                            <tr key={i} className="hover:bg-gray-50">
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="w-6 h-6 bg-gray-200 rounded animate-pulse"></div>
-                                                        <div className="h-4 bg-gray-200 rounded w-40 animate-pulse"></div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex gap-2">
-                                                        <div className="w-8 h-8 bg-gray-200 rounded-lg animate-pulse"></div>
-                                                        <div className="w-8 h-8 bg-gray-200 rounded-lg animate-pulse"></div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </>
+            <div style={{ padding: '40px 32px', maxWidth: '1280px' }}>
+
+                {/* ── Page header ── */}
+                <header style={{ marginBottom: '32px', borderBottom: '2px solid #000000', paddingBottom: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+                        <div>
+                            <p className="font-mono uppercase" style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '1.2px', color: '#757575', lineHeight: 1.23, marginBottom: '6px' }}>
+                                ShareVault · Saved Files
+                            </p>
+                            <h1 className="font-display" style={{ fontSize: '2.5rem', fontWeight: 400, letterSpacing: '-0.5px', color: '#1a1a1a', lineHeight: 1.05, margin: 0 }}>
+                                Saved Files
+                                <span className="font-mono" style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '1.2px', color: '#757575', marginLeft: '12px', verticalAlign: 'middle' }}>
+                                    {!loading && `${savedFiles.length}`}
+                                </span>
+                            </h1>
+                        </div>
+
+                        {/* View toggle */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {[{ mode: 'list', Icon: ListIcon }, { mode: 'grid', Icon: GridIcon }].map(({ mode, Icon }) => (
+                                <button
+                                    key={mode}
+                                    onClick={() => setViewMode(mode)}
+                                    title={`${mode} view`}
+                                    style={{
+                                        background: 'transparent',
+                                        border: viewMode === mode ? '2px solid #000000' : '1px solid #757575',
+                                        borderRadius: '50%',
+                                        width: '36px', height: '36px',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        cursor: 'pointer',
+                                        color: viewMode === mode ? '#000000' : '#757575',
+                                        transition: 'color 120ms, border-color 120ms',
+                                    }}
+                                >
+                                    <Icon size={16} strokeWidth={viewMode === mode ? 2 : 1.5} />
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </header>
+
+                {/* ── Loading skeleton ── */}
+                {loading && viewMode === 'grid' && (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1px', backgroundColor: '#000000' }}>
+                        {[...Array(8)].map((_, i) => <SkeletonCard key={i} />)}
+                    </div>
+                )}
+                {loading && viewMode === 'list' && (
+                    <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #000000' }}>
+                        <thead style={{ backgroundColor: '#000000' }}>
+                            <tr><TH>Name</TH><TH>Size</TH><TH>Saved At</TH><TH>Owner</TH><TH>Actions</TH></tr>
+                        </thead>
+                        <tbody>{[...Array(6)].map((_, i) => <SkeletonRow key={i} />)}</tbody>
+                    </table>
                 )}
 
-                {/* Empty State */}
+                {/* ── Empty state ── */}
                 {!loading && savedFiles.length === 0 && (
-                    <div className="bg-white rounded-lg shadow p-12 flex flex-col items-center justify-center">
-                        <BookmarkIcon 
-                            size={48} 
-                            className="text-purple-300 mb-4" 
-                        />
-                        <h3 className="text-xl font-medium text-gray-700 mb-2">
-                            No saved files yet
-                        </h3>
-                        <p className="text-gray-500 text-center max-w-md mb-6">
-                            Start saving files to access them quickly later. Click the "Browse Files" button to get started.
+                    <div style={{ padding: '64px 32px', textAlign: 'center', border: '1px solid #000000' }}>
+                        <BookmarkIcon size={40} strokeWidth={1} style={{ color: '#757575', margin: '0 auto 16px' }} />
+                        <p className="font-mono uppercase" style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '1.2px', color: '#757575', marginBottom: '8px' }}>
+                            No saved files
                         </p>
-                        <button 
+                        <p className="font-body" style={{ fontSize: '1rem', color: '#757575', lineHeight: 1.5, margin: '0 auto 24px', maxWidth: '360px' }}>
+                            Save files shared with you to access them quickly from this page.
+                        </p>
+                        <button
                             onClick={() => navigate('/dashboard')}
-                            className="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 hover:scale-105 transition-all duration-200"
+                            className="font-ui"
+                            style={{
+                                padding: '12px 24px', fontSize: '1rem', fontWeight: 700, letterSpacing: '0.3px',
+                                border: '2px solid #000000', borderRadius: 0,
+                                backgroundColor: '#000000', color: '#ffffff',
+                                cursor: 'pointer', transition: 'background-color 150ms',
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#1a1a1a'; }}
+                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#000000'; }}
                         >
                             Browse Files
                         </button>
                     </div>
                 )}
 
-                {/* Grid View */}
-                {!loading && savedFiles.length > 0 && viewMode === "grid" && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {/* ── Grid view ── */}
+                {!loading && savedFiles.length > 0 && viewMode === 'grid' && (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1px', backgroundColor: '#000000' }}>
                         {savedFiles.map((file) => (
+                            /* DESIGN.md: no rounded corners, no shadow */
                             <div
                                 key={file._id}
-                                className="bg-white rounded-lg shadow hover:shadow-xl transition-all duration-300 p-6 border border-gray-100 group"
+                                onMouseEnter={() => setHoverCard(file._id)}
+                                onMouseLeave={() => setHoverCard(null)}
+                                style={{ position: 'relative', backgroundColor: '#ffffff', overflow: 'hidden' }}
                             >
-                                {/* File Icon */}
-                                <div className="flex justify-center mb-4">
-                                    <div className="w-20 h-20 flex items-center justify-center rounded-lg bg-gradient-to-br from-purple-50 to-blue-50 group-hover:scale-110 transition-transform duration-300">
-                                        {getFileIcon(file.fileName)}
-                                    </div>
+                                {/* Preview */}
+                                <div style={{ height: '112px', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid #e2e8f0' }}>
+                                    {getFileIcon(file.fileName)}
                                 </div>
 
-                                {/* File Name */}
-                                <h3 className="text-sm font-semibold text-gray-800 mb-3 text-center truncate" title={file.fileName}>
-                                    {file.fileName}
-                                </h3>
-
-                                {/* File Info */}
-                                <div className="text-xs text-gray-500 space-y-1 mb-4 text-center">
-                                    <p className="font-medium">{file.size}</p>
-                                    <p className="text-gray-400">Saved: {formatDate(file.savedAt)}</p>
+                                {/* Details */}
+                                <div style={{ padding: '12px' }}>
+                                    <p className="font-ui" title={file.fileName} style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1a1a1a', letterSpacing: '0.108px', lineHeight: 1.23, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '4px' }}>
+                                        {file.fileName}
+                                    </p>
+                                    <p className="font-mono uppercase" style={{ fontSize: '0.63rem', letterSpacing: '1.1px', color: '#757575', lineHeight: 1.33, margin: '0 0 2px' }}>
+                                        {file.size}
+                                    </p>
+                                    <p className="font-mono uppercase" style={{ fontSize: '0.63rem', letterSpacing: '1.1px', color: '#757575', lineHeight: 1.33, margin: 0 }}>
+                                        Saved {formatDate(file.savedAt)}
+                                    </p>
                                 </div>
 
-                                {/* Action Buttons */}
-                                <div className="flex gap-2 justify-center pt-3 border-t border-gray-100">
-                                    <a
-                                        href={`/file/${file.fileId}`}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        title="View File"
-                                        className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
-                                    >
-                                        <Eye size={18} />
-                                    </a>
+                                {/* Hover action strip */}
+                                <div style={{
+                                    position: 'absolute', bottom: 0, left: 0, right: 0,
+                                    backgroundColor: '#000000',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                                    padding: '8px',
+                                    opacity: hoverCard === file._id ? 1 : 0,
+                                    transition: 'opacity 120ms',
+                                }}>
+                                    <RoundBtn href={`/file/${file.fileId}`} title="View file">
+                                        <Eye size={14} strokeWidth={2} style={{ color: '#ffffff' }} />
+                                    </RoundBtn>
                                     <button
                                         onClick={() => handleRemoveClick(file.fileId, file.fileName)}
-                                        title="Remove from Saved"
-                                        className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+                                        title="Unsave"
+                                        style={{ ...RoundBtnBaseStyle, color: '#ffffff' }}
                                     >
-                                        <BookmarkX size={18} />
+                                        <BookmarkX size={14} strokeWidth={2} />
                                     </button>
                                 </div>
-                                
                             </div>
                         ))}
                     </div>
                 )}
 
-                {/* List View */}
-                {!loading && savedFiles.length > 0 && viewMode === "list" && (
-                    <div className="overflow-x-auto bg-white rounded-lg shadow">
-                        <table className="min-w-full">
-                            <thead className="bg-gray-50 border-b border-gray-200">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Saved At</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner Name</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200">
-                                {savedFiles.map((file) => (
-                                    <tr key={file._id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
-                                            <div className="flex items-center gap-2">
-                                                {getFileIcon(file.fileName)}
-                                                {file.fileName}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                            {formatFileSize(file.size)}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                            {formatDate(file.savedAt)}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                            {file.ownerName}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <div className="flex gap-2">
-                                                <a
-                                                    href={`/file/${file.fileId}`}
-                                                    target="_blank"
-                                                    rel="noreferrer"
-                                                    title="View File"
-                                                    className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
-                                                >
-                                                    <Eye size={18} />
-                                                </a>
-                                                <button
-                                                    onClick={() => handleRemoveClick(file.fileId, file.fileName)}
-                                                    title="Remove from Saved"
-                                                    className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
-                                                >
-                                                    <BookmarkX size={18} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                {/* ── List view ── */}
+                {!loading && savedFiles.length > 0 && viewMode === 'list' && (
+                    <>
+                        {/* Desktop table */}
+                        <div className="hidden lg:block" style={{ border: '1px solid #000000', overflowX: 'auto' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <thead style={{ backgroundColor: '#000000' }}>
+                                    <tr><TH>Name</TH><TH>Size</TH><TH>Saved At</TH><TH>Owner</TH><TH>Actions</TH></tr>
+                                </thead>
+                                <tbody>
+                                    {savedFiles.map((file) => (
+                                        <tr
+                                            key={file._id}
+                                            style={{ transition: 'background-color 120ms' }}
+                                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f9f9f9'; }}
+                                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+                                        >
+                                            <TD>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', maxWidth: '320px' }}>
+                                                    {getSmallFileIcon(file.fileName)}
+                                                    <span className="font-ui" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1a1a1a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                        {file.fileName}
+                                                    </span>
+                                                </div>
+                                            </TD>
+                                            <TD>
+                                                <span className="font-mono uppercase" style={{ fontSize: '0.69rem', letterSpacing: '1.1px', color: '#757575' }}>
+                                                    {formatFileSize(file.size)}
+                                                </span>
+                                            </TD>
+                                            <TD>
+                                                <span className="font-mono uppercase" style={{ fontSize: '0.69rem', letterSpacing: '1.1px', color: '#757575' }}>
+                                                    {formatDate(file.savedAt)}
+                                                </span>
+                                            </TD>
+                                            <TD>
+                                                <span className="font-ui" style={{ fontSize: '0.875rem', color: '#1a1a1a' }}>
+                                                    {file.ownerName}
+                                                </span>
+                                            </TD>
+                                            <TD>
+                                                <div style={{ display: 'flex', gap: '6px' }}>
+                                                    <RoundBtn href={`/file/${file.fileId}`} title="View file">
+                                                        <Eye size={13} strokeWidth={1.5} />
+                                                    </RoundBtn>
+                                                    <RoundBtn onClick={() => handleRemoveClick(file.fileId, file.fileName)} title="Unsave">
+                                                        <BookmarkX size={13} strokeWidth={1.5} />
+                                                    </RoundBtn>
+                                                </div>
+                                            </TD>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Mobile stacked */}
+                        <div className="lg:hidden" style={{ display: 'flex', flexDirection: 'column', gap: '1px', backgroundColor: '#000000' }}>
+                            {savedFiles.map((file) => (
+                                <div key={file._id} style={{ backgroundColor: '#ffffff', padding: '16px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                                        {getSmallFileIcon(file.fileName)}
+                                        <span className="font-ui" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1a1a1a', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                            {file.fileName}
+                                        </span>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '16px', marginBottom: '12px', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px', flexWrap: 'wrap' }}>
+                                        <span className="font-mono uppercase" style={{ fontSize: '0.63rem', letterSpacing: '1.1px', color: '#757575' }}>{formatFileSize(file.size)}</span>
+                                        <span className="font-mono uppercase" style={{ fontSize: '0.63rem', letterSpacing: '1.1px', color: '#757575' }}>Saved {formatDate(file.savedAt)}</span>
+                                        <span className="font-ui" style={{ fontSize: '0.69rem', color: '#757575' }}>{file.ownerName}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                        <RoundBtn href={`/file/${file.fileId}`} title="View file"><Eye size={13} strokeWidth={1.5} /></RoundBtn>
+                                        <RoundBtn onClick={() => handleRemoveClick(file.fileId, file.fileName)} title="Unsave"><BookmarkX size={13} strokeWidth={1.5} /></RoundBtn>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                )}
+
+                {/* Footer rule */}
+                {!loading && savedFiles.length > 0 && (
+                    <div style={{ marginTop: '32px', borderTop: '1px solid #e2e8f0', paddingTop: '12px' }}>
+                        <p className="font-mono uppercase" style={{ fontSize: '0.63rem', letterSpacing: '1.1px', color: '#757575' }}>
+                            {savedFiles.length} saved file{savedFiles.length !== 1 ? 's' : ''} · sorted by save date
+                        </p>
                     </div>
                 )}
             </div>
 
-            {/* Confirmation Modal */}
+            {/* ── Unsave confirmation modal ── */}
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
@@ -350,17 +411,26 @@ const SavedFiles = () => {
                 confirmText="Unsave"
                 cancelText="Cancel"
                 onConfirm={removeFromSavedFiles}
-                confirmationButtonClass="bg-red-600 hover:bg-red-700"
-                size="md"
+                size="sm"
             >
-                <div className="space-y-4">
-                    <p className="text-gray-600">
-                        Are you sure you want to unsave <span className="font-semibold text-gray-900">"{selectedFileName}"</span> from your saved files?
-                    </p>x
-                </div>
+                <p className="font-body" style={{ fontSize: '1rem', color: '#1a1a1a', lineHeight: 1.5 }}>
+                    Remove{' '}
+                    <span className="font-ui" style={{ fontWeight: 700 }}>"{selectedFileName}"</span>
+                    {' '}from your saved files?
+                </p>
             </Modal>
         </DashboardLayout>
     );
+};
+
+/* tiny constant needed for grid hover actions */
+const RoundBtnBaseStyle = {
+    background: 'rgba(255,255,255,0.12)',
+    border: '1px solid rgba(255,255,255,0.35)',
+    borderRadius: '50%',
+    width: '30px', height: '30px',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    cursor: 'pointer', flexShrink: 0,
 };
 
 export default SavedFiles;

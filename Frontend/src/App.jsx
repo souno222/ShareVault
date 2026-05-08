@@ -7,6 +7,8 @@ import Subscription from "./pages/Subscription";
 import Transactions from "./pages/Transactions";
 import Upload from "./pages/Upload";
 import SavedFiles from "./pages/SavedFiles";
+import SignInPage from "./auth/SignInPage";
+import SignUpPage from "./auth/SignUpPage";
 import { SignedIn,SignedOut,RedirectToSignIn } from "@clerk/clerk-react";
 import { Toaster } from "react-hot-toast";
 import { UserCreditsProvider } from "./context/UserCreditsContext";
@@ -18,6 +20,8 @@ const App =() => {
         <Toaster />
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/sign-in/*" element={<SignInPage />} />
+          <Route path="/sign-up/*" element={<SignUpPage />} />
           <Route path="/dashboard" element={
             <>
             <SignedIn><Dashboard /></SignedIn>

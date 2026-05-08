@@ -1,85 +1,129 @@
-import TextType from '../TextType';
+import TextType from "../TextType";
 const HeroSection = ({ openSignIn, openSignUp, isSignedIn, navigate }) => {
+    const stats = [
+        { number: "1K+", label: "Active Users" },
+        { number: "500K+", label: "Files Shared" },
+        { number: "99.9%", label: "Uptime SLA" },
+    ];
+
     return (
-        <div className="landing-page-content bg-purple-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="pt-20 pb-16 sm:pt-24 sm:pb-20 lg:pt-32 lg:pb-28">
-                    <div className="text-center">
-                        <div className="inline-block mb-4">
-                            <span className="px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-semibold">
-                                Secure File Sharing Platform
-                            </span>
-                        </div>
-                        <h1 className="text-5xl tracking-tight font-bold text-gray-900 sm:text-6xl md:text-7xl leading-tight">
-                            <TextType 
-                                  text={["Share Files Securely with"]}
-                                  typingSpeed={50}
-                                  pauseDuration={1500}
-                                  showCursor={true}
-                                  cursorCharacter=""
-                            />
-                            <span className="block text-purple-600 mt-2"> ShareVault</span>
-                        </h1>
-                        <p className="mt-6 max-w-2xl mx-auto text-lg text-gray-600 sm:text-xl md:mt-8 md:text-2xl leading-relaxed">
-                            Upload, manage, and share your files with ease and security. Experience seamless file sharing with CloudShare.
-                        </p>
-                        <div className="mt-12 max-w-sm mx-auto sm:max-w-none sm:flex sm:justify-center">
-                            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
-                                <button 
-                                onClick={()=> openSignUp()}
-                                className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold rounded-lg text-white bg-purple-600 hover:bg-purple-700 transition-all duration-200 shadow-md hover:shadow-xl transform hover:-translate-y-0.5">
-                                    Get Started
-                                </button>
-                                {isSignedIn ? (
-                                    <button 
-                                    onClick={()=> navigate('/dashboard')} 
-                                    className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold rounded-lg text-white bg-gray-800 hover:bg-gray-900 transition-all duration-200 shadow-md hover:shadow-xl transform hover:-translate-y-0.5">
-                                        Dashboard
-                                    </button>
-                                    ):(
-                                    <button 
-                                    onClick={()=> openSignIn()} 
-                                    className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold rounded-lg text-gray-900 bg-white border-2 border-gray-900 hover:bg-gray-900 hover:text-white transition-all duration-200 shadow-md hover:shadow-xl transform hover:-translate-y-0.5">
-                                        Sign In
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="mt-16 mb-40 text-center pb-12">
-                    <p className="text-4xl text-gray-600 font-medium">
-                        All your files in one place. Access them anytime, anywhere.
+        <section className="bg-paper border-b border-ink">
+            <div className="max-w-editorial mx-auto px-4 sm:px-6 lg:px-16">
+
+                {/* ── HERO COPY ── */}
+                <div className="pt-12 pb-0">
+                    {/* Eyebrow kicker */}
+                    <p className="font-mono text-[0.81rem] tracking-kicker uppercase text-caption leading-kicker mb-3">
+                        Secure File Sharing Platform
                     </p>
-                </div>
-                <div className="flex flex-wrap relative mt-16 mb-48 grid-cols-1">
-                    <div className=" mb-25 ml-30 -rotate-x-45 -rotate-y-30 scale-110 flex-none rounded-2xl scale-40 overflow-hidden border-r-8 border-b-8 border-blue-200 ">
-                        <img src="/MobileView.png" alt="Mobile View" className="object-contain w-auto h-auto"/>
-                    </div>
-                    <div className="rotate-x-45 rotate-z-30 flex-shrink rounded-2xl  overflow-hidden border-t-2 border-r-8 border-b-8 border-blue-200 -mt-25 transition-transform duration-600 ease-in-out shadow-lg shadow-purple-200">
-                        <img src="/Dashboard.png" alt="Dashboard" className="object-cover w-full h-full"/>
+
+                    {/* H1 — product name in large Playfair */}
+                    <h1 className="font-display font-bold text-[4rem] leading-hero tracking-hero text-page-ink max-w-3xl mb-4">
+                        ShareVault
+                    </h1>
+
+                    {/* H2 — italic tagline */}
+                    <h2 className="font-display italic font-thin text-[2.25rem] leading-[1.15] tracking-hero text-page-ink max-w-3xl mb-6">
+                        <TextType text={["Share, Manage, and Protect Your Files — at the Speed of Trust."]}
+                            typingSpeed={50}
+                            pauseDuration={1500}
+                            showCursor={true}
+                            cursorCharacter="" />
+                    </h2>
+
+                    {/* Deck */}
+                    <p className="font-body text-[1.19rem] leading-deck tracking-[0.108px] text-page-ink max-w-xl mb-10">
+                        ShareVault gives individuals and teams a secure space to upload,
+                        organize, and distribute files with surgical precision. No clutter.
+                        No compromise.
+                    </p>
+
+                    {/* CTA buttons */}
+                    <div className="flex flex-wrap gap-4 mb-12">
+                        <button
+                            id="hero-cta-signup"
+                            onClick={() => navigate('/sign-up')}
+                            className="font-ui font-bold text-base tracking-btn text-ink bg-paper border-2 border-ink px-6 py-3 rounded-none cursor-pointer hover:bg-ink hover:text-paper transition-colors duration-150"
+                        >
+                            Get Started Free
+                        </button>
+                        {isSignedIn ? (
+                            <button
+                                id="hero-cta-dashboard"
+                                onClick={() => navigate("/dashboard")}
+                                className="font-ui font-bold text-base tracking-btn text-paper bg-ink border-2 border-ink px-6 py-3 rounded-none cursor-pointer hover:bg-paper hover:text-ink transition-colors duration-150"
+                            >
+                                Go to Dashboard
+                            </button>
+                        ) : (
+                            <button
+                                id="hero-cta-signin"
+                                onClick={() => navigate('/sign-in')}
+                                className="font-ui font-bold text-base tracking-btn text-paper bg-ink border-2 border-ink px-6 py-3 rounded-none cursor-pointer hover:bg-paper hover:text-ink transition-colors duration-150"
+                            >
+                                Sign In
+                            </button>
+                        )}
                     </div>
                 </div>
 
-                <div className="mt-16 text-center pb-12">
-                    <div className="mt-12 grid grid-cols-3 gap-8 max-w-3xl mx-auto">
-                        <div className="text-center">
-                            <div className="text-4xl font-bold text-purple-600">10K+</div>
-                            <div className="text-sm text-gray-600 mt-2">Active Users</div>
+                {/* ── HAIRLINE RULE ── */}
+                <hr className="border-0 border-t border-ink m-0" />
+
+                {/* ── STATS ROW ── */}
+                <div className="grid grid-cols-3 border-b border-ink">
+                    {stats.map((stat, i) => (
+                        <div
+                            key={i}
+                            className={`py-8 ${i > 0 ? "pl-8" : "pl-0"} ${i < 2 ? "pr-8 border-r border-ink" : "pr-0"}`}
+                        >
+                            <div className="font-display font-normal text-[2.5rem] leading-none tracking-hero text-page-ink mb-2">
+                                {stat.number}
+                            </div>
+                            <div className="font-mono text-[0.81rem] tracking-kicker uppercase text-caption leading-kicker">
+                                {stat.label}
+                            </div>
                         </div>
-                        <div className="text-center">
-                            <div className="text-4xl font-bold text-purple-600">500K+</div>
-                            <div className="text-sm text-gray-600 mt-2">Files Shared</div>
+                    ))}
+                </div>
+
+                {/* ── PRODUCT SCREENSHOTS ── */}
+                {/* Separated by 1px ink gap acting as divider */}
+                <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-px bg-ink">
+                    {/* Primary — 16:9 */}
+                    <div className="bg-paper">
+                        <img
+                            src="/Dashboard.png"
+                            alt="ShareVault dashboard interface"
+                            loading="eager"
+                            className="w-full aspect-video object-cover block rounded-none"
+                        />
+                        <div className="py-2 border-t border-ink">
+                            <p className="font-body font-bold text-[0.80rem] leading-[2.2] tracking-[0.108px] text-caption">
+                                ShareVault dashboard — files at a glance, always under control.
+                            </p>
                         </div>
-                        <div className="text-center">
-                            <div className="text-4xl font-bold text-purple-600">99.9%</div>
-                            <div className="text-sm text-gray-600 mt-2">Uptime</div>
+                    </div>
+
+                    {/* Secondary — 4:3 */}
+                    <div className="bg-paper">
+                        <img
+                            src="/MobileView.png"
+                            alt="ShareVault mobile view"
+                            loading="eager"
+                            className="w-full aspect-[4/3] object-cover block rounded-none"
+                        />
+                        <div className="py-2 border-t border-ink">
+                            <p className="font-body font-bold text-[0.80rem] leading-[2.2] tracking-[0.108px] text-caption">
+                                Mobile interface. Full control anywhere.
+                            </p>
                         </div>
                     </div>
                 </div>
+
             </div>
-        </div>
+        </section>
     );
-}
+};
 
 export default HeroSection;

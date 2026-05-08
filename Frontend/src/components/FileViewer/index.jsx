@@ -6,35 +6,39 @@ import AudioViewer from "./AudioViewer";
 import TextViewer from "./TextViewer";
 import UnsupportedFileViewer from "./UnsupportedFileViewer";
 
-const FileViewer = ({ file, blob, getFileType }) => {
+/**
+ * FileViewer — router component
+ * Passes onDownload through to UnsupportedFileViewer so the
+ * "Download File" CTA is wired up from the parent.
+ */
+const FileViewer = ({ file, blob, getFileType, onDownload }) => {
     const [fileType, setFileType] = useState(null);
 
     useEffect(() => {
         if (file) {
-            const type = getFileType(file.name);
-            setFileType(type);
+            setFileType(getFileType(file.name));
         }
     }, [file, getFileType]);
 
     const renderViewer = () => {
         switch (fileType) {
-            case 'image':
+            case "image":
                 return <ImageViewer blob={blob} fileName={file.name} />;
-            case 'pdf':
+            case "pdf":
                 return <PDFViewer blob={blob} fileName={file.name} />;
-            case 'video':
+            case "video":
                 return <VideoViewer blob={blob} fileName={file.name} />;
-            case 'audio':
+            case "audio":
                 return <AudioViewer blob={blob} fileName={file.name} />;
-            case 'text':
+            case "text":
                 return <TextViewer blob={blob} fileName={file.name} />;
             default:
-                return <UnsupportedFileViewer fileName={file.name} />;
+                return <UnsupportedFileViewer fileName={file.name} onDownload={onDownload} />;
         }
     };
 
     return (
-        <div className="w-full h-full">
+        <div style={{ width: "100%", height: "100%" }}>
             {renderViewer()}
         </div>
     );

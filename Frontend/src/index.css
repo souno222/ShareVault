@@ -1,5 +1,40 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');@import "tailwindcss";
+/* Google Fonts — Playfair Display (display), Lora (body serif), JetBrains Mono (kicker/meta), Inter (UI) */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Lora:ital,wght@0,400;0,700;1,400&display=swap');
 
-*{
-  font-family: 'Poppins', sans-serif;
+@import "tailwindcss";
+
+/* ── WIRED Design Tokens (Tailwind v4 @theme) ── */
+@theme {
+  /* Colors */
+  --color-ink:        #000000;
+  --color-page-ink:   #1a1a1a;
+  --color-paper:      #ffffff;
+  --color-link-blue:  #057dbc;
+  --color-caption:    #757575;
+  --color-disabled:   #999999;
+  --color-hairline:   #e2e8f0;
+
+  /* Font Families */
+  --font-display: 'Playfair Display', helvetica, serif;
+  --font-body:    'Lora', helvetica, serif;
+  --font-ui:      'Inter', helvetica, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Courier New', monospace;
+
+  /* Letter Spacing */
+  --tracking-hero:    -0.5px;
+  --tracking-grid:    -0.144px;
+  --tracking-kicker:  0.92px;
+  --tracking-ribbon:  1.2px;
+  --tracking-meta:    1.1px;
+  --tracking-btn:     0.3px;
+  --tracking-link:    0.4px;
+
+  /* Line Heights */
+  --leading-hero:     1.05;
+  --leading-grid:     1.18;
+  --leading-deck:     1.47;
+  --leading-kicker:   1.23;
+
+  /* Max Widths */
+  --width-editorial: 1280px;
 }

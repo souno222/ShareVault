@@ -3,206 +3,229 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
 import { apiEndpoints } from "../util/apiendpoints";
-import { Copy, ShareIcon, Download, BookmarkCheck, Bookmark } from "lucide-react";
+import { Copy, Download, BookmarkCheck, Bookmark, AlertCircle } from "lucide-react";
 import LinkShareModal from "../components/LinkShareModal";
 import FileViewer from "../components/FileViewer";
 import toast from "react-hot-toast";
 
+/* ─── file type map ────────────────────────────────── */
+const FILE_TYPE_MAP = {
+    jpg: "image", jpeg: "image", png: "image", gif: "image",
+    webp: "image", svg: "image", bmp: "image", ico: "image",
+    pdf: "pdf",
+    mp4: "video", webm: "video", ogg: "video", mov: "video", avi: "video", mkv: "video",
+    mp3: "audio", wav: "audio", flac: "audio", m4a: "audio",
+    txt: "text", md: "text", csv: "text", json: "text", xml: "text", log: "text",
+    js: "text", jsx: "text", ts: "text", tsx: "text", html: "text", css: "text",
+    py: "text", java: "text", cpp: "text", c: "text", yml: "text", yaml: "text",
+};
+
+const getFileType = (fileName) => {
+    const ext = fileName.split(".").pop().toLowerCase();
+    return FILE_TYPE_MAP[ext] || "unsupported";
+};
+
+const formatSize = (bytes) => {
+    if (!bytes) return "—";
+    const kb = bytes / 1024;
+    const mb = kb / 1024;
+    if (mb >= 1) return mb.toFixed(2) + " MB";
+    if (kb >= 1) return kb.toFixed(2) + " KB";
+    return bytes + " B";
+};
+
+/* ─── Inline WIRED header action button ─────────────── */
+const HeaderBtn = ({ children, onClick, title }) => {
+    const [h, setH] = useState(false);
+    return (
+        <button
+            onClick={onClick}
+            title={title}
+            onMouseEnter={() => setH(true)}
+            onMouseLeave={() => setH(false)}
+            className="font-ui"
+            style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "8px 16px",
+                fontSize: "0.875rem",
+                fontWeight: 700,
+                letterSpacing: "0.3px",
+                lineHeight: 1.25,
+                border: "2px solid #000000",
+                borderRadius: 0,
+                backgroundColor: h ? "#000000" : "#ffffff",
+                color: h ? "#ffffff" : "#000000",
+                cursor: "pointer",
+                transition: "background-color 150ms, color 150ms",
+                whiteSpace: "nowrap",
+            }}
+        >
+            {children}
+        </button>
+    );
+};
+
+/* ═══════════════════════════════════════════════════
+   PublicFileView page
+═══════════════════════════════════════════════════ */
 const PublicFileView = () => {
     const [file, setFile] = useState(null);
     const [fileBlob, setFileBlob] = useState(null);
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaved, setIsSaved] = useState(false);
-    const [shareModal, setShareModal] = useState({
-        isOpen: false,
-        link: ""
-    });
+    const [shareModal, setShareModal] = useState({ isOpen: false, link: "" });
     const { getToken } = useAuth();
     const { fileId } = useParams();
     const navigate = useNavigate();
 
+    /* ── check saved state ── */
     const checkIfFileSaved = async (id) => {
         try {
             const token = await getToken();
-            const response = await axios.get(apiEndpoints.IS_FILE_SAVED(id), {
-                headers: { Authorization: `Bearer ${token}` }
+            const res = await axios.get(apiEndpoints.IS_FILE_SAVED(id), {
+                headers: { Authorization: `Bearer ${token}` },
             });
-            setIsSaved(response.data.isSaved);
-        } catch (error) {
-            console.error("Error checking if file is saved:", error);
+            setIsSaved(res.data.isSaved);
+        } catch {
             setIsSaved(false);
         }
     };
 
+    /* ── save / unsave ── */
     const handleFileSave = async () => {
         try {
             const token = await getToken();
-            const response = await axios.post(
+            const res = await axios.post(
                 apiEndpoints.ADD_TO_SAVED(file.id),
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            if (response.status === 201 || response.status === 200) {
-                toast.success("File saved successfully");
+            if (res.status === 201 || res.status === 200) {
+                toast.success("File saved");
                 setIsSaved(true);
             }
-        } catch (error) {
-            console.error("Error saving file:", error);
-            const errorMessage = error.response?.data?.error || "Error saving file";
-            toast.error(errorMessage);
+        } catch (err) {
+            toast.error(err.response?.data?.error || "Error saving file");
         }
     };
 
     const handleFileUnsave = async () => {
         try {
             const token = await getToken();
-            const response = await axios.delete(
+            const res = await axios.delete(
                 apiEndpoints.REMOVE_FROM_SAVED(file.id),
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            if (response.status === 201 || response.status === 200 || response.status === 204) {
+            if ([200, 201, 204].includes(res.status)) {
                 toast.success("File removed from saved");
                 setIsSaved(false);
             }
-        } catch (error) {
-            console.error("Error unsaving file:", error);
-            const errorMessage = error.response?.data?.error || "Error removing file";
-            toast.error(errorMessage);
+        } catch (err) {
+            toast.error(err.response?.data?.error || "Error removing file");
         }
     };
 
-    const getFileType = (fileName) => {
-        const extension = fileName.split('.').pop().toLowerCase();
-        
-        const fileTypeMap = {
-            // Images
-            'jpg': 'image',
-            'jpeg': 'image',
-            'png': 'image',
-            'gif': 'image',
-            'webp': 'image',
-            'svg': 'image',
-            'bmp': 'image',
-            'ico': 'image',
-            
-            // PDFs
-            'pdf': 'pdf',
-
-            // Videos
-            'mp4': 'video',
-            'webm': 'video',
-            'ogg': 'video',
-            'mov': 'video',
-            'avi': 'video',
-            'mkv': 'video',
-            
-            // Audio
-            'mp3': 'audio',
-            'wav': 'audio',
-            'flac': 'audio',
-            'm4a': 'audio',
-            
-            // Text
-            'txt': 'text',
-            'md': 'text',
-            'csv': 'text',
-            'json': 'text',
-            'xml': 'text',
-            'log': 'text',
-            'js': 'text',
-            'jsx': 'text',
-            'ts': 'text',
-            'tsx': 'text',
-            'html': 'text',
-            'css': 'text',
-            'py': 'text',
-            'java': 'text',
-            'cpp': 'text',
-            'c': 'text',
-            'yml': 'text',
-            'yaml': 'text',
-        };
-        return fileTypeMap[extension] || 'unsupported';
+    /* ── download ── */
+    const handleDownload = () => {
+        if (!fileBlob || !file) return;
+        const url = window.URL.createObjectURL(new Blob([fileBlob]));
+        const a = document.createElement("a");
+        a.href = url;
+        a.setAttribute("download", file.name);
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
     };
 
+    /* ── fetch file ── */
     useEffect(() => {
-        const getFileAndDownload = async () => {
+        const load = async () => {
             try {
                 const token = await getToken();
-                console.log("AXIOS TARGET URL:", apiEndpoints.PUBLIC_FILE_VIEW(fileId));
-                // Get file metadata
-                const fileResponse = await axios.get(apiEndpoints.PUBLIC_FILE_VIEW(fileId), {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setFile(fileResponse.data);
-
-                // Check if file is saved
-                await checkIfFileSaved(fileResponse.data.id);
-
-                // Download file blob
-                const blobResponse = await axios.get(apiEndpoints.DOWNLOAD_FILE(fileResponse.data.id), {
+                const fileRes = await axios.get(apiEndpoints.PUBLIC_FILE_VIEW(fileId), {
                     headers: { Authorization: `Bearer ${token}` },
-                    responseType: 'blob'
                 });
-                setFileBlob(blobResponse.data);
+                setFile(fileRes.data);
+                await checkIfFileSaved(fileRes.data.id);
+
+                const blobRes = await axios.get(apiEndpoints.DOWNLOAD_FILE(fileRes.data.id), {
+                    headers: { Authorization: `Bearer ${token}` },
+                    responseType: "blob",
+                });
+                setFileBlob(blobRes.data);
                 setError(null);
-            } catch (error) {
-                console.error("Error fetching file:", error);
+            } catch {
                 setError("Failed to load file. The link may be invalid or the file may have been removed.");
             } finally {
                 setIsLoading(false);
             }
         };
-        getFileAndDownload();
+        load();
     }, [fileId, getToken]);
 
-    const handleDownload = () => {
-        if (!fileBlob || !file) return;
-        
-        const url = window.URL.createObjectURL(new Blob([fileBlob]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', file.name);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
-    };
-
-    const openShareModal = () => {
-        setShareModal({
-            isOpen: true,
-            link: window.location.href,
-        });
-    };
-
-    const closeShareModal = () => {
-        setShareModal({
-            isOpen: false,
-            link: "",
-        });
-    };
-
+    /* ── loading ── */
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+            <div
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    minHeight: "100vh",
+                    backgroundColor: "#ffffff",
+                }}
+            >
+                <p
+                    className="font-mono uppercase"
+                    style={{ fontSize: "0.75rem", fontWeight: 700, letterSpacing: "1.2px", color: "#757575", lineHeight: 1 }}
+                >
+                    Loading file…
+                </p>
             </div>
         );
     }
 
+    /* ── error ── */
     if (error) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="text-center">
-                    <p className="text-red-600 text-lg">{error}</p>
-                    <button
-                        onClick={() => navigate("/")}
-                        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            <div
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    minHeight: "100vh",
+                    backgroundColor: "#ffffff",
+                    padding: "32px",
+                }}
+            >
+                <div style={{ maxWidth: "480px", width: "100%" }}>
+                    {/* Error banner */}
+                    <div
+                        style={{
+                            display: "flex",
+                            alignItems: "flex-start",
+                            gap: "12px",
+                            padding: "12px 16px",
+                            borderLeft: "4px solid #000000",
+                            backgroundColor: "#ffffff",
+                            marginBottom: "24px",
+                        }}
                     >
-                        Go to Home
-                    </button>
+                        <AlertCircle size={16} strokeWidth={2} style={{ color: "#1a1a1a", flexShrink: 0, marginTop: "1px" }} />
+                        <div>
+                            <p className="font-mono uppercase" style={{ fontSize: "0.69rem", fontWeight: 700, letterSpacing: "1.2px", color: "#1a1a1a", lineHeight: 1, marginBottom: "3px" }}>
+                                Error
+                            </p>
+                            <p className="font-ui" style={{ fontSize: "0.875rem", fontWeight: 600, color: "#1a1a1a", lineHeight: 1.4, margin: 0 }}>
+                                {error}
+                            </p>
+                        </div>
+                    </div>
+                    <HeaderBtn onClick={() => navigate("/")}>Go to Home</HeaderBtn>
                 </div>
             </div>
         );
@@ -211,74 +234,164 @@ const PublicFileView = () => {
     if (!file) return null;
 
     return (
-        <div className="bg-gray-50 min-h-screen">
-            <header className="p-4 border-b bg-white">
-                <div className="container mx-auto flex justify-between items-center">
-                    <div 
-                        onClick={() => navigate("/")}
-                        style={{cursor: "pointer"}}
-                        className="flex items-center gap-2">
-                        <ShareIcon className="text-blue-600" />
-                        <span className="font-bold text-xl text-gray-800">
-                            ShareVault
-                        </span>
-                    </div>
-                    <div className="flex gap-2">
-                        {isSaved ? (
-                            <button 
-                                onClick={handleFileUnsave}
-                                className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition">
-                                <BookmarkCheck size={18} />
-                                Unsave
-                            </button>
-                        ) : (
-                            <button
-                                onClick={handleFileSave}
-                                className="flex items-center gap-2 px-4 py-2 bg-yellow-50 text-yellow-600 rounded-lg hover:bg-yellow-100 transition">
-                                <Bookmark size={18} />
-                                Save
-                            </button>
-                        )}
-                        <button
-                            onClick={handleDownload}
-                            className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition"
-                        >
-                            <Download size={18} />
-                            Download
-                        </button>
-                        <button
-                            onClick={openShareModal}
-                            className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition"
-                        >
-                            <Copy size={18} />
-                            Share Link
-                        </button>
-                    </div>
+        /* DESIGN.md: paper white canvas, no tint */
+        <div style={{ backgroundColor: "#ffffff", minHeight: "100vh" }}>
+
+            {/* ── Navbar ── */}
+            {/* DESIGN.md: white nav, 2px black border-bottom, no shadow */}
+            <header
+                style={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 30,
+                    backgroundColor: "#ffffff",
+                    borderBottom: "2px solid #000000",
+                    padding: "0 24px",
+                    height: "61px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "16px",
+                }}
+            >
+                {/* Wordmark */}
+                <div
+                    onClick={() => navigate("/")}
+                    style={{ cursor: "pointer" }}
+                >
+                    <span
+                        className="font-display"
+                        style={{
+                            fontSize: "1.5rem",
+                            fontWeight: 700,
+                            letterSpacing: "-0.5px",
+                            color: "#000000",
+                            lineHeight: 1,
+                        }}
+                    >
+                        ShareVault
+                    </span>
                 </div>
-                <LinkShareModal
-                    isOpen={shareModal.isOpen}
-                    onClose={closeShareModal}
-                    link={shareModal.link}
-                    title="Share File Link"
-                />
+
+                {/* Action buttons — all WIRED primary CTA style */}
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+                    {/* Save / Unsave toggle */}
+                    <HeaderBtn
+                        onClick={isSaved ? handleFileUnsave : handleFileSave}
+                        title={isSaved ? "Unsave file" : "Save file"}
+                    >
+                        {isSaved
+                            ? <><BookmarkCheck size={15} strokeWidth={2} /> Unsave</>
+                            : <><Bookmark size={15} strokeWidth={1.5} /> Save</>
+                        }
+                    </HeaderBtn>
+
+                    {/* Download */}
+                    <HeaderBtn onClick={handleDownload} title="Download file">
+                        <Download size={15} strokeWidth={2} />
+                        Download
+                    </HeaderBtn>
+
+                    {/* Share link */}
+                    <HeaderBtn onClick={() => setShareModal({ isOpen: true, link: window.location.href })} title="Copy share link">
+                        <Copy size={15} strokeWidth={2} />
+                        Share
+                    </HeaderBtn>
+                </div>
             </header>
 
-            <main className="container mx-auto p-4 md:p-8">
-                <div className="max-w-5xl mx-auto">
-                    <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                        <h1 className="text-2xl font-bold text-gray-800">{file.name}</h1>
-                        <p className="text-sm text-gray-500 mt-1">
-                            Size: {(file.size / 1024).toFixed(2)} KB
-                        </p>
-                    </div>
+            {/* ── Main ── */}
+            <main style={{ maxWidth: "1100px", margin: "0 auto", padding: "40px 24px" }}>
 
-                    <div className="bg-white rounded-lg shadow-sm p-6">
-                        {fileBlob && <FileViewer file={file} blob={fileBlob} getFileType={getFileType} />}
+                {/* ── File metadata block ── */}
+                {/* DESIGN.md: no card/shadow — hairline left-strip + editorial spacing */}
+                <div
+                    style={{
+                        marginBottom: "32px",
+                        borderBottom: "2px solid #000000",
+                        paddingBottom: "16px",
+                    }}
+                >
+                    {/* Kicker */}
+                    <p
+                        className="font-mono uppercase"
+                        style={{
+                            fontSize: "0.75rem",
+                            fontWeight: 700,
+                            letterSpacing: "1.2px",
+                            color: "#757575",
+                            lineHeight: 1.23,
+                            marginBottom: "6px",
+                        }}
+                    >
+                        ShareVault · File Preview
+                    </p>
+
+                    {/* File name as display heading */}
+                    <h1
+                        className="font-display"
+                        style={{
+                            fontSize: "2rem",
+                            fontWeight: 400,
+                            letterSpacing: "-0.5px",
+                            color: "#1a1a1a",
+                            lineHeight: 1.08,
+                            margin: "0 0 8px",
+                            wordBreak: "break-all",
+                        }}
+                    >
+                        {file.name}
+                    </h1>
+
+                    {/* Meta row */}
+                    <div style={{ display: "flex", gap: "24px", flexWrap: "wrap" }}>
+                        <span
+                            className="font-mono uppercase"
+                            style={{ fontSize: "0.69rem", letterSpacing: "1.1px", color: "#757575", lineHeight: 1.33 }}
+                        >
+                            Size: {formatSize(file.size)}
+                        </span>
+                        {file.uploadedAt && (
+                            <span
+                                className="font-mono uppercase"
+                                style={{ fontSize: "0.69rem", letterSpacing: "1.1px", color: "#757575", lineHeight: 1.33 }}
+                            >
+                                Uploaded: {new Date(file.uploadedAt).toLocaleDateString()}
+                            </span>
+                        )}
                     </div>
                 </div>
+
+                {/* ── File viewer ── */}
+                {fileBlob && (
+                    <FileViewer
+                        file={file}
+                        blob={fileBlob}
+                        getFileType={getFileType}
+                        onDownload={handleDownload}
+                    />
+                )}
+
+                {/* ── Footer rule ── */}
+                <div style={{ marginTop: "40px", borderTop: "1px solid #e2e8f0", paddingTop: "12px" }}>
+                    <p
+                        className="font-mono uppercase"
+                        style={{ fontSize: "0.63rem", letterSpacing: "1.1px", color: "#757575" }}
+                    >
+                        Shared via ShareVault · {getFileType(file.name).toUpperCase()} file
+                    </p>
+                </div>
             </main>
+
+            {/* Share modal */}
+            <LinkShareModal
+                isOpen={shareModal.isOpen}
+                onClose={() => setShareModal({ isOpen: false, link: "" })}
+                link={shareModal.link}
+                title="Share File Link"
+            />
         </div>
     );
-}
+};
 
 export default PublicFileView;

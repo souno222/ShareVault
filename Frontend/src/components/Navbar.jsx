@@ -1,62 +1,71 @@
-import {useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { MenuIcon, X,Share2,Wallet } from "lucide-react";
-import { UserButton} from "@clerk/clerk-react";
+import { MenuIcon, X } from "lucide-react";
+import { UserButton } from "@clerk/clerk-react";
 import { SignedIn } from "@clerk/clerk-react";
 import SideMenu from "./SideMenu";
 import CreditsDisplay from "./CreditsDisplay";
 import { UserCreditsContext } from "../context/UserCreditsContext";
 
-
-const Navbar =({activeMenu}) => {   
+const Navbar = ({ activeMenu }) => {
     const [openSideMenu, setOpenSideMenu] = useState(false);
-    const { credits,fetchCredits } = useContext(UserCreditsContext);
+    const { credits, fetchCredits } = useContext(UserCreditsContext);
 
-    useEffect(() =>{
+    useEffect(() => {
         fetchCredits();
-    },[fetchCredits]);
+    }, [fetchCredits]);
 
     return (
-        <div className="flex items-center justify-between gap-5 bg-white border border-b border-gray-200/50 backdrop-blur-[2px] py-4 px-4 sm:px-7 sticky top-0 z-30">
-            {/**Left side - menu button and title */}
-            <div className="flex items-center gap-5">
-                <button 
-                onClick={() => setOpenSideMenu(!openSideMenu)} 
-                className="block lg:hidden text-black hover:bg-gray-100 p-1 rounded transition-colors">
-                    {openSideMenu ? (
-                       <X className="text-2xl"/>
-                    ):(
-                        <MenuIcon className="text-2xl"/>
-                    )}
-                </button>
-                <div className="flex items-center gap-2">
-                    <Share2 className="text-blue-600"/>
-                    <span className="text-lg font-medium text-black truncate">
+        <>
+            {/* ── Main Navbar ── */}
+            {/* DESIGN.md: white nav bar, 2px black border bottom, no shadow */}
+            <div className="flex items-center justify-between gap-4 bg-paper border-b-2 border-ink py-0 px-4 sm:px-6 lg:px-8 sticky top-0 z-30 h-[61px]">
+
+                {/* Left: hamburger + wordmark */}
+                <div className="flex items-center gap-4">
+                    {/* Hamburger — visible below lg */}
+                    <button
+                        onClick={() => setOpenSideMenu(!openSideMenu)}
+                        className="lg:hidden bg-transparent border-none p-1.5 cursor-pointer text-ink hover:bg-hairline transition-colors"
+                        aria-label="Toggle menu"
+                    >
+                        {openSideMenu ? <X size={22} /> : <MenuIcon size={22} />}
+                    </button>
+
+                    {/* Wordmark — Playfair Display per DESIGN.md */}
+                    <Link
+                        to="/"
+                        className="font-display font-bold text-[1.5rem] tracking-hero text-ink no-underline leading-none"
+                    >
                         ShareVault
-                    </span>
+                    </Link>
                 </div>
+
+                {/* Right: credits chip + user avatar */}
+                <SignedIn>
+                    <div className="flex items-center gap-4 ml-auto">
+                        {/* Credits — link to subscription */}
+                        <Link to="/subscription" className="no-underline">
+                            <CreditsDisplay credits={credits} />
+                        </Link>
+
+                        {/* Clerk UserButton — the only circular element allowed (round icon button) */}
+                        <div className="flex-shrink-0">
+                            <UserButton />
+                        </div>
+                    </div>
+                </SignedIn>
             </div>
 
-            {/* Right Side - Credits and user button*/}
-            <SignedIn>
-            <div className="flex items-center gap-2 sm:gap-4 ml-auto">
-                <Link to="/subscription">
-                    <CreditsDisplay credits={credits}/>
-                </Link>
-                <div className="relative flex-shrink-0">
-                    <UserButton />
-                </div>
-            </div>
-            </SignedIn>
-            {/** Side menu for small screens */}
+            {/* ── Mobile side-drawer ── */}
+            {/* DESIGN.md: border, no shadow, paper white */}
             {openSideMenu && (
-                <div className="fixed top-[73px] left-0 right-0 bg-white border-b border-gray-200 lg:hidden z-20">
-                    {/** Side Menu bar */}
+                <div className="fixed top-[61px] left-0 right-0 border-b border-ink bg-paper lg:hidden z-20">
                     <SideMenu activeMenu={activeMenu} />
                 </div>
             )}
-        </div>
-    )
-}
+        </>
+    );
+};
 
 export default Navbar;

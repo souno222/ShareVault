@@ -1,66 +1,112 @@
-import { Check } from "lucide-react";
-import {useClerk} from "@clerk/clerk-react";
+const PricingSection = ({ pricingPlans, navigate }) => {
+    const tierLabels = ["Entry Tier", "Most Popular", "Enterprise"];
 
-const PricingSection = ({pricingPlans, openSignUp}) => {
     return (
-        <div className="py-20 bg-indigo-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center">
-                    <h2 className="text-4xl font-bold text-gray-900 sm:text-5xl">
-                        Simple, Transparent Pricing
-                    </h2>
-                    <p className="mt-6 max-w-3xl mx-auto text-xl text-gray-600">
-                        Choose the plan that fits your needs. No hidden fees, no surprises.
-                    </p>
-                </div>
-                <div className="mt-20 space-y-8 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-8">
-                    {pricingPlans.map((plan,index) => (
-                        <div key={index} className={`flex flex-col rounded-2xl overflow-hidden border-2 transition-all duration-300 ${plan.highlighted ? 'border-purple-600 shadow-2xl transform scale-105' : 'border-gray-200 shadow-lg hover:shadow-xl hover:border-purple-300'}`}>
-                            <div className={`px-8 py-8 ${plan.highlighted ? 'bg-purple-600' : 'bg-white'}`}>
-                                <div className="flex justify-between items-center">
-                                   <h3 className={`text-2xl font-bold ${plan.highlighted ? 'text-white' : 'text-gray-900'}`}>
-                                    {plan.name}
-                                    </h3>
-                                    {plan.highlighted && (
-                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-white text-purple-600">
-                                            POPULAR
-                                        </span>    
-                                    )}
-                                </div>
-                                <p className={`mt-4 text-sm ${plan.highlighted ? 'text-purple-100' : 'text-gray-600'}`}>
-                                    {plan.description}
-                                </p>
-                                <div className="mt-8">
-                                    <span className={`text-5xl font-bold ${plan.highlighted ? 'text-white' : 'text-gray-900'}`}>
-                                        ₹{plan.price}
-                                    </span>
-                                    <span className={`text-lg ${plan.highlighted ? 'text-purple-100' : 'text-gray-600'}`}></span>
-                                </div>
-                            </div>
-                            <div className="flex-1 flex flex-col justify-between px-8 py-8 bg-white">
-                                    <ul className="space-y-4 mb-8">
-                                        {plan.features.map((feature,featureIndex)=>(
-                                            <li key={featureIndex} className="flex items-start">
-                                                <div className="flex-shrink-0">
-                                                        <Check className="h-6 w-6 text-purple-600"/>
-                                                </div>
-                                                <p className="ml-3 text-base text-gray-700">{feature}</p>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                    <button 
-                                        onClick={openSignUp}
-                                        className={`w-full px-6 py-4 text-base font-semibold rounded-lg transition-all duration-200 transform hover:-translate-y-1 ${plan.highlighted ? 'text-purple-600 bg-white hover:bg-gray-100 shadow-md hover:shadow-lg' : 'text-white bg-purple-600 hover:bg-purple-700 shadow-md hover:shadow-lg'}`}>
-                                        {plan.cta}
-                                    </button>
-                            </div>
-                        </div>
-                    ))}
-                       
+        <section id="pricing" className="bg-paper border-b border-ink">
+            {/* ── Section Ribbon ── */}
+            <div className="bg-ink">
+                <div className="max-w-editorial mx-auto px-4 sm:px-6 lg:px-16 py-2.5">
+                    <span className="font-mono font-bold text-[0.75rem] tracking-ribbon uppercase text-paper leading-none">
+                        Pricing
+                    </span>
                 </div>
             </div>
-        </div>
+
+            <div className="max-w-editorial mx-auto px-4 sm:px-6 lg:px-16">
+                {/* Section header */}
+                <div className="pt-12 pb-8 border-b border-ink max-w-xl">
+                    <p className="font-mono text-[0.81rem] tracking-kicker uppercase text-caption leading-kicker mb-3">
+                        Simple, Transparent Pricing
+                    </p>
+                    <h2 className="font-display font-normal text-[1.63rem] leading-grid text-page-ink">
+                        No hidden fees. No dark patterns. Just the plan you need.
+                    </h2>
+                </div>
+
+                {/* Pricing columns */}
+                <div className="grid grid-cols-1 md:grid-cols-3 border-b border-ink">
+                    {pricingPlans.map((plan, index) => {
+                        const highlighted = plan.highlighted;
+                        const isLast = index === pricingPlans.length - 1;
+
+                        return (
+                            <article
+                                key={index}
+                                id={`plan-${plan.name.toLowerCase()}`}
+                                className={[
+                                    "flex flex-col p-10",
+                                    index === 0 ? "pl-0" : "",
+                                    isLast ? "pr-0" : "border-r border-ink",
+                                    highlighted ? "bg-ink" : "bg-paper",
+                                ].join(" ")}
+                            >
+                                {/* Tier kicker */}
+                                <p className={`font-mono text-[0.81rem] tracking-kicker uppercase leading-kicker mb-2 ${highlighted ? "text-white/50" : "text-caption"}`}>
+                                    {tierLabels[index]}
+                                </p>
+
+                                {/* Plan name */}
+                                <h3 className={`font-display font-normal text-[1.63rem] leading-grid mb-4 ${highlighted ? "text-paper" : "text-page-ink"}`}>
+                                    {plan.name}
+                                </h3>
+
+                                {/* Price */}
+                                <div className={`border-y py-5 mb-6 ${highlighted ? "border-white/25" : "border-ink"}`}>
+                                    <span className={`font-display font-normal text-[2.5rem] leading-none tracking-hero ${highlighted ? "text-paper" : "text-page-ink"}`}>
+                                        ₹{plan.price}
+                                    </span>
+                                </div>
+
+                                {/* Description */}
+                                <p className={`font-body text-base leading-[1.5] mb-6 ${highlighted ? "text-white/75" : "text-caption"}`}>
+                                    {plan.description}
+                                </p>
+
+                                {/* Feature list */}
+                                <ul className="flex-1 flex flex-col mb-8">
+                                    {plan.features.map((feat, fi) => (
+                                        <li
+                                            key={fi}
+                                            className={`flex items-start gap-2.5 py-2.5 border-b text-base font-body leading-[1.5] ${highlighted ? "border-white/10 text-paper" : "border-hairline text-page-ink"}`}
+                                        >
+                                            <span className={`font-mono text-xs shrink-0 mt-0.5 ${highlighted ? "text-white/50" : "text-caption"}`}>
+                                                —
+                                            </span>
+                                            {feat}
+                                        </li>
+                                    ))}
+                                </ul>
+
+                                {/* CTA button */}
+                                {highlighted ? (
+                                    <button
+                                        id={`cta-plan-${plan.name.toLowerCase()}`}
+                                        onClick={() => navigate('/sign-up')}
+                                        className="w-full font-ui font-bold text-base tracking-btn text-ink bg-paper border-2 border-paper py-3 rounded-none cursor-pointer hover:bg-transparent hover:text-paper transition-colors duration-150"
+                                    >
+                                        {plan.cta}
+                                    </button>
+                                ) : (
+                                    <button
+                                        id={`cta-plan-${plan.name.toLowerCase()}`}
+                                        onClick={() => navigate('/sign-up')}
+                                        className="w-full font-ui font-bold text-base tracking-btn text-ink bg-paper border-2 border-ink py-3 rounded-none cursor-pointer hover:bg-ink hover:text-paper transition-colors duration-150"
+                                    >
+                                        {plan.cta}
+                                    </button>
+                                )}
+                            </article>
+                        );
+                    })}
+                </div>
+
+                {/* Fine print */}
+                <p className="font-mono text-[0.75rem] tracking-kicker uppercase text-caption py-5">
+                    Pay once. Use for life.
+                </p>
+            </div>
+        </section>
     );
-}
+};
 
 export default PricingSection;
