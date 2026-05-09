@@ -78,7 +78,7 @@ const FileCard = ({ file, onDelete, onManageVisibility, onDownload, onShareLink 
                         fontSize: '0.63rem',
                         fontWeight: 700,
                         letterSpacing: '1.2px',
-                        color: '#ffffff',
+                        color: '#000000',
                         backgroundColor: '#ffffffff',
                         borderRadius: '1920px',
                         padding: '2px 7px',
