@@ -144,12 +144,12 @@ const FileCard = ({ file, onDelete, onManageVisibility, onDownload, onShareLink 
                 }}
             >
                 {/* Round icon buttons — DESIGN.md: 50% radius ONLY for icon controls */}
-                {file.visibility === 'public' || file.visibility === 'protected' && (
+                {(file?.visibility === 'public' || file.visibility === 'protected') && (
                     <IconBtn onClick={() => onShareLink(file.id)} title="Share link">
                         <Copy size={14} strokeWidth={2} />
                     </IconBtn>
                 )}
-                {file.visibility === 'public' || file.visibility === 'protected' && (
+                {file?.visibility === 'public' || file.visibility === 'protected' && (
                     <a
                         href={`/file/${file.id}`}
                         target="_blank"

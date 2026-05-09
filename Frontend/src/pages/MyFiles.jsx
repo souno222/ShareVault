@@ -145,7 +145,7 @@ const MyFiles = () => {
     const navigate = useNavigate();
 
     const [deleteConfirmationOpen, setDeleteConfirmation] = useState({ isOpen: false, fileId: null });
-    const [shareModal, setShareModal] = useState({ isOpen: false, fileId: null, link: '' });
+    const [shareModal, setShareModal] = useState({ isOpen: false, fileId: null, link: '', file: null });
     const [renameModal, setRenameModal] = useState({ isOpen: false, fileId: null, currentFileName: '' });
     const [visibilityModal, setVisibilityModal] = useState({
         isOpen: false, fileId: null, fileName: '',
@@ -252,9 +252,10 @@ const MyFiles = () => {
 
     const openShareModal = (fileId) => {
         const link = `${window.location.origin}/file/${fileId}`;
-        setShareModal({ isOpen: true, fileId, link });
+        const file = files.find(f => f.id === fileId);
+        setShareModal({ isOpen: true, fileId, link, file });
     };
-    const closeShareModal = () => setShareModal({ isOpen: false, fileId: null, link: '' });
+    const closeShareModal = () => setShareModal({ isOpen: false, fileId: null, link: '', file: null });
 
     useEffect(() => { fetchFiles(); }, [getToken]);
 
@@ -493,7 +494,7 @@ const MyFiles = () => {
                                             <RoundBtn onClick={() => openDeleteConfirmation(file.id)} title="Delete"><TrashIcon size={13} strokeWidth={1.5} /></RoundBtn>
                                             <RoundBtn onClick={() => window.open(`/file/${file.id}`, '_blank')} title="View"><Eye size={13} strokeWidth={1.5} /></RoundBtn>
                                             {file.visibility === 'public' && (
-                                                <RoundBtn onClick={() => openShareModal(file.id)} title="Share"><CopyIcon size={13} strokeWidth={1.5} /></RoundBtn>
+                                                <RoundBtn onClick={() => openShareModal(file)} title="Share"><CopyIcon size={13} strokeWidth={1.5} /></RoundBtn>
                                             )}
                                         </div>
                                     </div>
@@ -533,6 +534,7 @@ const MyFiles = () => {
                 isOpen={shareModal.isOpen}
                 onClose={closeShareModal}
                 link={shareModal.link}
+                file={shareModal.file}
                 title="Share File Link"
             />
             <ManageFileVisibilityModal
