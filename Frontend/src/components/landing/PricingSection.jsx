@@ -14,7 +14,7 @@ const PricingSection = ({ pricingPlans, navigate }) => {
 
             <div className="max-w-editorial mx-auto px-4 sm:px-6 lg:px-16">
                 {/* Section header */}
-                <div className="pt-12 pb-8 border-b border-ink max-w-xl">
+                <div className="pt-12 pb-8 border-b border-ink ">
                     <p className="font-mono text-[0.81rem] tracking-kicker uppercase text-caption leading-kicker mb-3">
                         Simple, Transparent Pricing
                     </p>
@@ -24,7 +24,7 @@ const PricingSection = ({ pricingPlans, navigate }) => {
                 </div>
 
                 {/* Pricing columns */}
-                <div className="grid grid-cols-1 md:grid-cols-3 border-b border-ink">
+                <div className="grid grid-cols-1 md:grid-cols-3  border-b border-ink gap-0.5">
                     {pricingPlans.map((plan, index) => {
                         const highlighted = plan.highlighted;
                         const isLast = index === pricingPlans.length - 1;

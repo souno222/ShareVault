@@ -121,7 +121,7 @@ const Subscription = () => {
         };
     }, []);
 
-    
+
     /* ── Handle purchase ── */
     const handlePurchase = async (plan) => {
         if (!razorpayLoaded) {
@@ -342,7 +342,7 @@ const Subscription = () => {
                                             </span>
                                         </div>
                                         <p className="font-mono uppercase" style={{ fontSize: '0.69rem', letterSpacing: '1.1px', color: '#757575', marginTop: '6px', lineHeight: 1.33 }}>
-                                            For {storageDisplay.value} {storageDisplay.unit} additional storage
+                                            For {storageDisplay.value} {storageDisplay.unit}  storage
                                         </p>
                                     </div>
 

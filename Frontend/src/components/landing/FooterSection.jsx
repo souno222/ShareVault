@@ -57,8 +57,8 @@ const FooterSection = () => {
 
 
                     </div>
-                    <div>
-                        <h1 className="font-display font-bold text-[5rem] tracking-hero text-paper mb-2 leading-none">
+                    <div className="flex flex-col justify-center items-end text-right w-full overflow-hidden">
+                        <h1 className="font-display font-bold text-[12vw] tracking-hero text-paper mb-2 leading-none">
                             ShareVault
                         </h1>
                         <p className="font-body text-sm leading-[1.5] text-white/55 max-w-[200px]">
