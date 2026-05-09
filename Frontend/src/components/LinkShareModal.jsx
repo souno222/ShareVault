@@ -141,7 +141,7 @@ const LinkShareModal = ({
                         marginBottom: '4px',
                     }}
                 >
-                    Public Link
+                    {file.visibility === 'public' ? 'Public Link' : 'Protected Link'}
                 </p>
                 <p
                     style={{
@@ -151,7 +151,7 @@ const LinkShareModal = ({
                         lineHeight: 1.47,
                     }}
                 >
-                    Anyone with this link can view and download the file.
+                    {file.visibility === 'public' ? 'Anyone with this link can view and download the file.' : 'Only users added to the access list can view and download the file.'}
                 </p>
             </div>
 
