@@ -149,17 +149,17 @@ const FileCard = ({ file, onDelete, onManageVisibility, onDownload, onShareLink 
                         <Copy size={14} strokeWidth={2} />
                     </IconBtn>
                 )}
-                {file?.visibility === 'public' || file.visibility === 'protected' && (
-                    <a
-                        href={`/file/${file.id}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        title="View file"
-                        style={roundBtnStyle}
-                    >
-                        <EyeIcon size={14} strokeWidth={2} />
-                    </a>
-                )}
+
+                <a
+                    href={`/file/${file.id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    title="View file"
+                    style={roundBtnStyle}
+                >
+                    <EyeIcon size={14} strokeWidth={2} />
+                </a>
+
                 <IconBtn onClick={() => onDownload(file)} title="Download">
                     <DownloadIcon size={14} strokeWidth={2} />
                 </IconBtn>
